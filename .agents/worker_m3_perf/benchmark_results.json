@@ -1,0 +1,166 @@
+[
+  {
+    "endpoint": "GET /api/meals",
+    "method": "GET",
+    "url": "https://new-tracker-orpin.vercel.app/api/meals?userId=8319427555",
+    "minMs": 2155.32,
+    "maxMs": 2667.86,
+    "avgMs": 2343.04,
+    "category": "⚠️ Работает с замечаниями",
+    "runs": [
+      {
+        "run": 1,
+        "startTime": "2026-07-30T20:16:05.541Z",
+        "durationMs": 2205.95,
+        "status": 200,
+        "statusText": "OK",
+        "contentType": "application/json; charset=utf-8",
+        "bodySnippet": "{\"targetCalories\":2491,\"aiAnalysisText\":\"Для мужчины вашего возраста, роста и веса basal metabolic rate равен примерно 1984, ваша цель повышения калорийности на 500 калорий подчеркивает важность включения в рацион продуктов высокой калорийности, таких как арахисовое масло из REWE, либо цельного моло",
+        "bodyLength": 1287
+      },
+      {
+        "run": 2,
+        "startTime": "2026-07-30T20:16:07.754Z",
+        "durationMs": 2667.86,
+        "status": 200,
+        "statusText": "OK",
+        "contentType": "application/json; charset=utf-8",
+        "bodySnippet": "{\"targetCalories\":2491,\"aiAnalysisText\":\"Для мужчины вашего возраста, роста и веса basal metabolic rate равен примерно 1984, ваша цель повышения калорийности на 500 калорий подчеркивает важность включения в рацион продуктов высокой калорийности, таких как арахисовое масло из REWE, либо цельного моло",
+        "bodyLength": 1285
+      },
+      {
+        "run": 3,
+        "startTime": "2026-07-30T20:16:10.423Z",
+        "durationMs": 2155.32,
+        "status": 200,
+        "statusText": "OK",
+        "contentType": "application/json; charset=utf-8",
+        "bodySnippet": "{\"targetCalories\":2491,\"aiAnalysisText\":\"Для мужчины вашего возраста, роста и веса basal metabolic rate равен примерно 1984, ваша цель повышения калорийности на 500 калорий подчеркивает важность включения в рацион продуктов высокой калорийности, таких как арахисовое масло из REWE, либо цельного моло",
+        "bodyLength": 1285
+      }
+    ]
+  },
+  {
+    "endpoint": "GET /api/logs",
+    "method": "GET",
+    "url": "https://new-tracker-orpin.vercel.app/api/logs?userId=8319427555",
+    "minMs": 257.29,
+    "maxMs": 1312.58,
+    "avgMs": 611.93,
+    "category": "✅ Работает корректно",
+    "runs": [
+      {
+        "run": 1,
+        "startTime": "2026-07-30T20:16:12.579Z",
+        "durationMs": 265.91,
+        "status": 200,
+        "statusText": "OK",
+        "contentType": "application/json; charset=utf-8",
+        "bodySnippet": "{\"logs\":[{\"id\":73,\"timestamp\":\"2026-07-30T20:16:09.008594+00:00\",\"user_id\":\"8319427555\",\"method\":\"GET\",\"endpoint\":\"/api/meals\",\"status_code\":200,\"duration_ms\":2004,\"error_message\":null,\"metadata\":{\"query\":{\"userId\":\"8319427555\"},\"userAgent\":\"node\"}},{\"id\":72,\"timestamp\":\"2026-07-30T20:16:06.847084+0",
+        "bodyLength": 14814
+      },
+      {
+        "run": 2,
+        "startTime": "2026-07-30T20:16:12.846Z",
+        "durationMs": 1312.58,
+        "status": 200,
+        "statusText": "OK",
+        "contentType": "application/json; charset=utf-8",
+        "bodySnippet": "{\"logs\":[{\"id\":74,\"timestamp\":\"2026-07-30T20:16:09.26755+00:00\",\"user_id\":\"8319427555\",\"method\":\"GET\",\"endpoint\":\"/api/logs\",\"status_code\":200,\"duration_ms\":125,\"error_message\":null,\"metadata\":{\"query\":{\"userId\":\"8319427555\"},\"userAgent\":\"node\"}},{\"id\":73,\"timestamp\":\"2026-07-30T20:16:09.008594+00:0",
+        "bodyLength": 15052
+      },
+      {
+        "run": 3,
+        "startTime": "2026-07-30T20:16:14.159Z",
+        "durationMs": 257.29,
+        "status": 200,
+        "statusText": "OK",
+        "contentType": "application/json; charset=utf-8",
+        "bodySnippet": "{\"logs\":[{\"id\":74,\"timestamp\":\"2026-07-30T20:16:09.26755+00:00\",\"user_id\":\"8319427555\",\"method\":\"GET\",\"endpoint\":\"/api/logs\",\"status_code\":200,\"duration_ms\":125,\"error_message\":null,\"metadata\":{\"query\":{\"userId\":\"8319427555\"},\"userAgent\":\"node\"}},{\"id\":73,\"timestamp\":\"2026-07-30T20:16:09.008594+00:0",
+        "bodyLength": 15052
+      }
+    ]
+  },
+  {
+    "endpoint": "GET /api/changelog",
+    "method": "GET",
+    "url": "https://new-tracker-orpin.vercel.app/api/changelog",
+    "minMs": 144.35,
+    "maxMs": 195.87,
+    "avgMs": 162.97,
+    "category": "❌ Сломано",
+    "runs": [
+      {
+        "run": 1,
+        "startTime": "2026-07-30T20:16:14.417Z",
+        "durationMs": 148.68,
+        "status": 500,
+        "statusText": "Internal Server Error",
+        "contentType": "text/html; charset=utf-8",
+        "bodySnippet": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Internal Server Error</pre>\n</body>\n</html>\n",
+        "bodyLength": 148
+      },
+      {
+        "run": 2,
+        "startTime": "2026-07-30T20:16:14.567Z",
+        "durationMs": 195.87,
+        "status": 500,
+        "statusText": "Internal Server Error",
+        "contentType": "text/html; charset=utf-8",
+        "bodySnippet": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Internal Server Error</pre>\n</body>\n</html>\n",
+        "bodyLength": 148
+      },
+      {
+        "run": 3,
+        "startTime": "2026-07-30T20:16:14.763Z",
+        "durationMs": 144.35,
+        "status": 500,
+        "statusText": "Internal Server Error",
+        "contentType": "text/html; charset=utf-8",
+        "bodySnippet": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Internal Server Error</pre>\n</body>\n</html>\n",
+        "bodyLength": 148
+      }
+    ]
+  },
+  {
+    "endpoint": "POST /api/npc/chat",
+    "method": "POST",
+    "url": "https://new-tracker-orpin.vercel.app/api/npc/chat",
+    "minMs": 622.59,
+    "maxMs": 755.85,
+    "avgMs": 708.99,
+    "category": "✅ Работает корректно",
+    "runs": [
+      {
+        "run": 1,
+        "startTime": "2026-07-30T20:16:14.908Z",
+        "durationMs": 755.85,
+        "status": 200,
+        "statusText": "OK",
+        "contentType": "application/json; charset=utf-8",
+        "bodySnippet": "{\"text\":\"Ну наконец-то. Что я могу сделать для тебя сегодня? Хочешь поговорить о тренировках или может быть о питании? Давай, я весь внимание.\",\"food_log\":null}",
+        "bodyLength": 160
+      },
+      {
+        "run": 2,
+        "startTime": "2026-07-30T20:16:15.664Z",
+        "durationMs": 622.59,
+        "status": 200,
+        "statusText": "OK",
+        "contentType": "application/json; charset=utf-8",
+        "bodySnippet": "{\"text\":\"Привет! Я готов помочь тебе с фитнесом и питанием. Какой у тебя вопрос или чем ты хочешь поделиться?\",\"food_log\":null}",
+        "bodyLength": 127
+      },
+      {
+        "run": 3,
+        "startTime": "2026-07-30T20:16:16.287Z",
+        "durationMs": 748.52,
+        "status": 200,
+        "statusText": "OK",
+        "contentType": "application/json; charset=utf-8",
+        "bodySnippet": "{\"text\":\"Привет, готов помочь с вопросами о фитнесе и питании. Чего ты хочешь знать или что хочешь обсудить?\",\"food_log\":null}",
+        "bodyLength": 126
+      }
+    ]
+  }
+]

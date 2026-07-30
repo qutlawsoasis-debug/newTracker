@@ -155,7 +155,10 @@ app.use(express.static(distPath));
 
 // Strict Data Isolation Auth Middleware
 const requireAuth = (req, res, next) => {
-  const rawUserId = req.query.userId || req.body.userId || req.headers['x-user-id'];
+  if (!req.query.userId && !req.body?.userId) {
+    return res.status(400).json({ error: "userId is required" });
+  }
+  const rawUserId = req.query.userId || req.body?.userId || req.headers['x-user-id'];
   if (!rawUserId || rawUserId === 'undefined' || rawUserId === 'null') {
     console.warn(`[SECURITY] Blocked anonymous request to ${req.originalUrl}`);
     return res.status(401).json({ error: 'Unauthorized: Missing telegram_id (userId)' });
@@ -401,7 +404,7 @@ async function generateChangelog() {
 }
 
 // API to fetch dynamic AI release notes
-app.get('/api/changelog', requireAuth, async (req, res) => {
+app.get('/api/changelog', async (req, res) => {
   const version = req.query.version || DATA_VERSION;
   try {
     let description = "";
@@ -1048,6 +1051,10 @@ app.post('/api/profile', requireAuth, async (req, res) => {
   if (!gender || !age || !height || !weight || !activity || !goal) {
     return res.status(400).json({ error: 'Bad Request: Missing profile parameters' });
   }
+
+  if (age < 0 || age > 120) return res.status(400).json({error: "Invalid age"});
+  if (weight < 20 || weight > 300) return res.status(400).json({error: "Invalid weight"});
+  if (height < 100 || height > 250) return res.status(400).json({error: "Invalid height"});
 
   if (!groqApiKey) {
     return res.status(500).json({ error: 'AI features are not configured (missing Groq API key)' });

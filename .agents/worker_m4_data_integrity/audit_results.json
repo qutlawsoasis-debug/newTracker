@@ -1,0 +1,203 @@
+{
+  "timestamp": "2026-07-30T20:22:22.430Z",
+  "supabaseUrl": "https://duajmoeuumbqncoftzpu.supabase.co",
+  "testUser": "test_new_user_001",
+  "tables": {
+    "profiles": {
+      "userColumn": "telegram_id",
+      "jsClient": {
+        "success": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "fetch failed"
+      }
+    },
+    "daily_plans": {
+      "userColumn": "telegram_id",
+      "jsClient": {
+        "success": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "fetch failed"
+      }
+    },
+    "food_logs": {
+      "userColumn": "telegram_id",
+      "jsClient": {
+        "success": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "fetch failed"
+      }
+    },
+    "weight_history": {
+      "userColumn": "telegram_id",
+      "jsClient": {
+        "success": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "fetch failed"
+      }
+    },
+    "app_logs": {
+      "userColumn": "user_id",
+      "jsClient": {
+        "success": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "fetch failed"
+      }
+    },
+    "app_system_logs": {
+      "userColumn": "telegram_id",
+      "jsClient": {
+        "success": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "recordCount": 0,
+        "records": null,
+        "error": "fetch failed"
+      }
+    }
+  },
+  "overallLogs": {
+    "jsClient": {
+      "success": false,
+      "recordCount": 0,
+      "records": null,
+      "error": "TypeError: fetch failed"
+    }
+  },
+  "cleanup": {
+    "profiles": {
+      "jsClient": {
+        "success": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "fetch failed"
+      }
+    },
+    "daily_plans": {
+      "jsClient": {
+        "success": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "fetch failed"
+      }
+    },
+    "food_logs": {
+      "jsClient": {
+        "success": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "fetch failed"
+      }
+    },
+    "weight_history": {
+      "jsClient": {
+        "success": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "fetch failed"
+      }
+    },
+    "app_logs": {
+      "jsClient": {
+        "success": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "fetch failed"
+      }
+    },
+    "app_system_logs": {
+      "jsClient": {
+        "success": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "TypeError: fetch failed"
+      },
+      "restApi": {
+        "status": null,
+        "ok": false,
+        "deletedCount": 0,
+        "deletedRecords": null,
+        "error": "fetch failed"
+      }
+    }
+  }
+}
