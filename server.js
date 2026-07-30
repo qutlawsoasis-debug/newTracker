@@ -1225,6 +1225,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
           .from('daily_plans')
           .select('*')
           .eq('telegram_id', userId.toString())
+          .eq('date', today)
           .maybeSingle();
         
         if (plData) {
@@ -1404,8 +1405,7 @@ app.post('/api/meals', requireAuth, async (req, res) => {
     try {
       // 1. Save profile if provided
       if (profile) {
-        await supabase.from('profiles').upsert({
-          telegram_id: userId.toString(),
+        await supabase.from('profiles').update({
           gender: profile.gender,
           age: parseInt(profile.age, 10),
           height: parseInt(profile.height, 10),
@@ -1414,7 +1414,7 @@ app.post('/api/meals', requireAuth, async (req, res) => {
           goal: profile.goal,
           target_calories: profile.targetCalories,
           ai_analysis_text: profile.aiAnalysisText
-        });
+        }).eq('telegram_id', userId.toString());
       }
 
       // 2. Save weight history list

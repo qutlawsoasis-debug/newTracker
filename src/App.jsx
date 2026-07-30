@@ -597,6 +597,7 @@ function App() {
 
     const timer = setTimeout(() => {
       const persistState = async () => {
+        if (!meals || Object.keys(meals).length === 0) return;
         const today = new Date().toDateString();
         try {
             const res = await fetch("/api/meals", {
@@ -680,7 +681,7 @@ function App() {
   const handleReroll = useCallback(async (section) => {
     if (!profile) return;
     try {
-      const res = await fetch(`/api/meals?userId=${userId}`);
+      const res = await fetch(`/api/meals?userId=${userId}&regenerate=true&section=${section}`);
       if (res.ok) {
         const contentType = res.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
@@ -1451,7 +1452,7 @@ function App() {
 
             {/* Dashboard Calorie Card */}
             <CalorieCounter 
-              eatenCalories={tgUser?.id ? globalAnalytics.eatenCalories : eatenCalories} 
+              eatenCalories={eatenCalories} 
               targetCalories={targetCalories} 
               totalCalories={totalCalories}
               lostCalories={lostCalories}

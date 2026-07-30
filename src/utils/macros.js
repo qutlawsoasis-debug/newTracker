@@ -36,7 +36,7 @@ export function calculateEatenMacros(meals, eatenMeals, targetCalories, targetMa
   let fats = 0;
   let carbs = 0;
   
-  if (!meals || !eatenMeals) return { protein, fats, carbs };
+  if (!meals || !eatenMeals || !targetMacros || !targetCalories) return { protein: 0, fats: 0, carbs: 0 };
 
   // Calculate the ratio of each macro per 1 kcal to approximate missing data
   const proteinPerKcal = targetCalories > 0 ? targetMacros.protein / targetCalories : 0;
