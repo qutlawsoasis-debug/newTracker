@@ -1457,6 +1457,33 @@ app.post('/api/meals/replace-ready', requireAuth, async (req, res) => {
     console.error("Ready-to-eat replacement failed:", err);
     return res.status(500).json({ error: "Alternative generation failed: " + err.message });
   }
+app.get('/api/debug', async (req, res) => {
+  const userId = req.query.userId;
+  if (!userId) return res.json({ error: "no userId" });
+
+  if (!supabase) {
+    return res.json({ error: "supabase client not initialized" });
+  }
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .or(`telegram_id.eq.${userId},user_id.eq.${userId}`)
+    .maybeSingle();
+    
+  const { data: meals } = await supabase
+    .from('daily_plans')
+    .select('*')
+    .or(`telegram_id.eq.${userId},user_id.eq.${userId}`)
+    .maybeSingle();
+    
+  res.json({
+    userId,
+    profileExists: !!profile,
+    profile: profile || null,
+    mealsExist: !!meals,
+    mealsDate: meals?.date || null
+  });
 });
 
 app.post('/api/telegram-webhook', async (req, res) => {
