@@ -1476,37 +1476,7 @@ app.post('/api/meals/replace-ready', requireAuth, async (req, res) => {
   } catch (err) {
   logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
     console.error("Ready-to-eat replacement failed:", err);
-    return res.status(500).json({ error: "Alternative generation failed: " + err.message });
   }
-});
-
-app.get('/api/debug', async (req, res) => {
-  const userId = req.query.userId;
-  if (!userId) return res.json({ error: "no userId" });
-
-  if (!supabase) {
-    return res.json({ error: "supabase client not initialized" });
-  }
-  
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .or(`telegram_id.eq.${userId},user_id.eq.${userId}`)
-    .maybeSingle();
-    
-  const { data: meals } = await supabase
-    .from('daily_plans')
-    .select('*')
-    .or(`telegram_id.eq.${userId},user_id.eq.${userId}`)
-    .maybeSingle();
-    
-  res.json({
-    userId,
-    profileExists: !!profile,
-    profile: profile || null,
-    mealsExist: !!meals,
-    mealsDate: meals?.date || null
-  });
 });
 
 app.get('/api/logs', async (req, res) => {
