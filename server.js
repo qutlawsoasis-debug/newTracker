@@ -352,58 +352,8 @@ Instructions:
   return data;
 }
 
-const changelogCache = {};
-
-// Gemini 2.5 Flash Release Notes Generator
-async function generateChangelog(version, rawChanges) {
-  if (changelogCache[version]) {
-    return changelogCache[version];
-  }
-
-  if (!rawChanges) {
-    rawChanges = "Небольшие улучшения стабильности и производительности.";
-    if (changelogData.history && changelogData.history[version]) {
-      rawChanges = changelogData.history[version].raw_changes;
-    }
-  }
-
-  try {
-    const model = genAI.getGenerativeModel({
-      model: "gemini-3.6-flash",
-      systemInstruction: `Strict Context Lock: You are a software release note generator for a fitness weight tracker application. You generate technical patch notes in Russian. You MUST NEVER use any emojis or decorative icons in any output text.
-Raw JSON Only: Output only a raw JSON string without markdown fences.`,
-      generationConfig: {
-        responseMimeType: "application/json"
-      }
-    });
-
-    const prompt = `Generate a short patch note list with 3-4 points in Russian for version ${version} of a fitness app named GainTracker.
-Focus strictly and exclusively on these features of version ${version}:
-${rawChanges}
-
-Output JSON structure:
-{
-  "version": "${version}",
-  "points": [
-    "...",
-    "...",
-    "..."
-  ]
-}`;
-
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
-    const data = safeJsonParse(text);
-    const points = data.points || [];
-    if (points.length > 0) {
-      changelogCache[version] = points;
-    }
-    return points;
-  } catch (err) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
-    console.error("Changelog generation failed:", err);
-    return rawChanges.split('. ').map(s => s.trim()).filter(Boolean);
-  }
+async function generateChangelog() {
+  return ['GainTracker v1.3.7 — стабильная версия.'];
 }
 
 // API to fetch dynamic AI release notes
