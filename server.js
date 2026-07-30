@@ -728,6 +728,34 @@ app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
         .update(updatedData)
         .eq('telegram_id', userId.toString());
       if (error) throw error;
+
+      // Check and process referral conversion reward (+200 points)
+      try {
+        const { data: refRecord } = await supabase
+          .from('referrals')
+          .select('id, referrer_id, converted')
+          .eq('invitee_id', userId.toString())
+          .maybeSingle();
+
+        if (refRecord && !refRecord.converted) {
+          const { data: refPts } = await supabase
+            .from('user_points')
+            .select('points')
+            .eq('telegram_id', refRecord.referrer_id)
+            .maybeSingle();
+
+          const newPoints = (refPts?.points || 0) + 200;
+          await supabase.from('user_points').upsert({
+            telegram_id: refRecord.referrer_id,
+            points: newPoints,
+            updated_at: new Date().toISOString()
+          });
+
+          await supabase.from('referrals').update({ converted: true }).eq('id', refRecord.id);
+        }
+      } catch (refErr) {
+        console.error("Failed to process referral conversion on subscribe:", refErr);
+      }
     }
     
     // Update local cache if fallback exists
@@ -1330,6 +1358,19 @@ app.get('/api/meals', requireAuth, async (req, res) => {
     console.log(`[Cache Hit] Returning today's existing plan for user ${userId} instantly.`);
     const dbSchedule = planData.schedule || {};
     const { tzOffset, sentNotifications, ...uiSchedule } = dbSchedule;
+    let userPointsVal = 0;
+    if (supabase) {
+      try {
+        const { data: ptsData } = await supabase
+          .from('user_points')
+          .select('points')
+          .eq('telegram_id', userId.toString())
+          .maybeSingle();
+        if (ptsData) userPointsVal = ptsData.points || 0;
+      } catch (e) {}
+    }
+    const refLinkStr = `https://t.me/TrackerCPFC_bot/app?startapp=ref_${userId}`;
+
     return res.json({ 
       targetCalories,
       aiAnalysisText,
@@ -1342,7 +1383,9 @@ app.get('/api/meals', requireAuth, async (req, res) => {
       weightHistory,
       globalAnalytics,
       todayScannedCalories,
-      todayScannedMacros
+      todayScannedMacros,
+      points: userPointsVal,
+      referral_link: refLinkStr
     });
   }
 
@@ -1598,6 +1641,20 @@ bot.command('start', async (ctx) => {
       resize_keyboard: true
     }
   });
+});
+
+bot.command('ref', async (ctx) => {
+  const userId = ctx.from.id;
+  const link = `https://t.me/TrackerCPFC_bot/app?startapp=ref_${userId}`;
+  await ctx.reply(
+    `🎯 Твоя реферальная ссылка:\n${link}\n\n` +
+    `За каждого друга который прошёл регистрацию: +50 баллов\n` +
+    `За каждого друга который купил Premium: +200 баллов\n` +
+    `500 баллов = 1 месяц Premium бесплатно!`,
+    { reply_markup: { inline_keyboard: [[
+      { text: '📤 Поделиться', url: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Попробуй GainTracker — трекер питания для набора веса!')}` }
+    ]]}}
+  );
 });
 
 bot.on('message:location', async (ctx) => {

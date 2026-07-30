@@ -3,6 +3,7 @@ import CalorieCounter from "./components/CalorieCounter";
 import MealCard from "./components/MealCard";
 import AIChat from "./components/AIChat";
 import OnboardingScreen from "./components/OnboardingScreen";
+import ReferralCard from "./components/ReferralCard";
 import changelogData from "../changelog.json";
 import { calculateTargetMacros, calculateEatenMacros } from "./utils/macros";
 import { Utensils, LineChart, Calendar, User, MessageCircle } from "lucide-react";
@@ -363,6 +364,7 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [todayScannedCalories, setTodayScannedCalories] = useState(0);
+  const [points, setPoints] = useState(0);
 
   const handleFoodLogged = useCallback((foodData) => {
     if (foodData && foodData.calories) {
@@ -575,6 +577,9 @@ function App() {
         if (data.todayScannedCalories !== undefined) {
           setTodayScannedCalories(data.todayScannedCalories);
         }
+        if (data.points !== undefined) {
+          setPoints(data.points);
+        }
         
         // Fetch AI changelog on mount
         try {
@@ -651,6 +656,23 @@ function App() {
           setWeightHistory([{ date: dateStr, weight: parseFloat(onboardingData.weight) }]);
         } catch (wErr) {
           console.error("Failed to record onboarding weight history:", wErr);
+        }
+      }
+
+      // Check and register referral if startapp contains ref_
+      const startapp = new URLSearchParams(window.location.search).get("startapp") || window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+      if (startapp && startapp.startsWith("ref_")) {
+        const referrerId = startapp.replace("ref_", "");
+        if (referrerId && referrerId !== userId.toString()) {
+          try {
+            await fetch("/api/referral/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId, referrerId })
+            });
+          } catch (rErr) {
+            console.error("Referral registration error:", rErr);
+          }
         }
       }
 
@@ -1719,6 +1741,20 @@ function App() {
                 </div>
               )
             )}
+
+            {/* Referral System Card */}
+            <ReferralCard
+              userId={userId}
+              lang={lang}
+              points={points}
+              onRedeemSuccess={(newExpiry) => {
+                setProfile(prev => ({
+                  ...prev,
+                  subscriptionStatus: 'premium',
+                  subscriptionExpiresAt: newExpiry
+                }));
+              }}
+            />
 
             {/* AI Dietitian Analysis Summary Card */}
             {profile?.aiAnalysisText && (
