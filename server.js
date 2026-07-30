@@ -1502,6 +1502,11 @@ app.post('/api/meals/replace-ready', requireAuth, async (req, res) => {
   }
 });
 
+app.post('/api/telegram-webhook', (req, res) => {
+  bot.handleUpdate(req.body);
+  res.sendStatus(200);
+});
+
 // Serve index.html for all other routes (Single Page App fallback)
 app.use((req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
@@ -1612,8 +1617,15 @@ bot.catch((err) => {
 });
 
 if (!process.env.DISABLE_BOT) {
-  bot.start();
-  console.log('Telegram Bot started');
+  (async () => {
+    try {
+      const webhookUrl = `${process.env.WEBAPP_URL}/api/telegram-webhook`;
+      await bot.api.setWebhook(webhookUrl);
+      console.log('Telegram Bot webhook set:', webhookUrl);
+    } catch (err) {
+      console.error('Failed to set Telegram Bot webhook:', err);
+    }
+  })();
 }
 
 // Function to notify allowed users about the latest update
