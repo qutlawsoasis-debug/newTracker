@@ -219,7 +219,6 @@ function App() {
   const searchParams = new URLSearchParams(window.location.search);
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
   const userId = tgUser?.id || searchParams.get("tgUserId") || "12345";
-  console.log("DEBUG userId:", userId, "tgUser:", tgUser, "searchParams:", searchParams.get("tgUserId"));
 
   // Жесткая изоляция кэша: удаляем данные, если зашел другой пользователь
   if (userId) {
