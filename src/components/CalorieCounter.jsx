@@ -44,7 +44,7 @@ export default function CalorieCounter({
     }, stepTime);
     
     return () => clearInterval(timer);
-  }, [eatenCalories, displayCalories]);
+  }, [eatenCalories]);
 
   const diff = targetCalories - eatenCalories;
   const isDeficit = diff > 0;

@@ -451,10 +451,10 @@ function App() {
         body: JSON.stringify({
           userId,
           gender: editProfileForm.gender,
-          age: parseInt(editProfileForm.age, 10),
-          height: parseInt(editProfileForm.height, 10),
-          weight: parseFloat(editProfileForm.weight),
-          activity: parseFloat(editProfileForm.activity),
+          age: parseInt(editProfileForm.age, 10) || 0,
+          height: parseInt(editProfileForm.height, 10) || 0,
+          weight: parseFloat(editProfileForm.weight) || 0,
+          activity: parseFloat(editProfileForm.activity) || 0,
           goal: editProfileForm.goal,
           lang
         })

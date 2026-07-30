@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MealIcon from "./MealIcon";
 
 export default function MealCard({ meal, section, label, time, onReroll, isEaten, onToggleEaten, lang, translations, onReplaceReady, isMissed }) {
@@ -6,6 +6,10 @@ export default function MealCard({ meal, section, label, time, onReroll, isEaten
   const [isExpanded, setIsExpanded] = useState(false);
   const [isRerolling, setIsRerolling] = useState(false);
   const [isReplacingReady, setIsReplacingReady] = useState(false);
+
+  useEffect(() => {
+    setCheckedItems({});
+  }, [meal?.id]);
 
   const handleReplaceReady = async () => {
     if (!onReplaceReady) return;

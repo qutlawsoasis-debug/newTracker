@@ -65,10 +65,11 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
   };
 
   const handleSendMessage = async (text, imageBase64 = null) => {
-    if (!text.trim() && !imageBase64) return;
+    const messageText = text.trim();
+    if (!messageText && !imageBase64) return;
     
     // Optimistic UI update
-    const newMsg = { sender: "user", text: text.trim(), image: imageBase64 };
+    const newMsg = { sender: "user", text: messageText, image: imageBase64 };
     setMessages(prev => [...prev, newMsg]);
     setInputValue("");
     setIsSending(true);
@@ -79,7 +80,7 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          message: text.trim(),
+          message: messageText,
           image: imageBase64,
           history: messages
         })
@@ -103,6 +104,7 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
       }
     } catch (err) {
       console.error("Chat error:", err);
+      if (messageText) setInputValue(messageText);
       setMessages(prev => [...prev, { 
         sender: "npc", 
         text: `Ошибка API: ${err.message || "Неизвестная ошибка"}` 

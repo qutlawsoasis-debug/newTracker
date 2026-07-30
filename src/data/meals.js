@@ -2,7 +2,7 @@ const mealsData = {
   high: {
     breakfast: [
       {
-        id: 1,
+        id: "b1",
         title_de: "Haferflocken Power Bowl",
         title_ru: "Овсяная пауэр-боул",
         calories: 850,
@@ -13,7 +13,7 @@ const mealsData = {
         recipe_de: "Haferflocken mit Milch aufgießen, 5 Minuten kochen. Geschnittene Banane, Nüsse, Erdnussbutter und Honig hinzufügen."
       },
       {
-        id: 2,
+        id: "b2",
         title_de: "Schoko-Bananen Shake",
         title_ru: "Шоколадно-банановый шейк",
         calories: 950,
@@ -24,7 +24,7 @@ const mealsData = {
         recipe_de: "Alle Zutaten 40 Sekunden im Mixer pürieren. Schnell am Computer trinken."
       },
       {
-        id: 3,
+        id: "b3",
         title_de: "Beeren-Quark Traum",
         title_ru: "Ягодно-творожная мечта",
         calories: 880,
@@ -35,7 +35,7 @@ const mealsData = {
         recipe_de: "Quark, Milch, Zucker und Beeren cremig mixen. Mit gehackten Mandeln bestreuen."
       },
       {
-        id: 4,
+        id: "b4",
         title_de: "Käse-Omelett mit Toast",
         title_ru: "Сырный омлет с тостом",
         calories: 820,
@@ -46,7 +46,7 @@ const mealsData = {
         recipe_de: "Omelett in Butter braten, vor dem Servieren mit Käse bestreuen. Toasts mit Frischkäse bestreichen."
       },
       {
-        id: 5,
+        id: "b5",
         title_de: "Avocado Egg Boats",
         title_ru: "Яичные лодочки в авокадо",
         calories: 810,
@@ -57,7 +57,7 @@ const mealsData = {
         recipe_de: "Avocado halbieren, Kern entfernen, Eier hineingeben, mit Speck und Käse bestreuen. 15 Min. im Ofen backen."
       },
       {
-        id: 6,
+        id: "b6",
         title_de: "Nutella Pancake Stack",
         title_ru: "Панкейки с Нутеллой",
         calories: 910,
@@ -68,7 +68,7 @@ const mealsData = {
         recipe_de: "Pfannkuchen aufwärmen, mit Nutella bestreichen, mit Bananenscheiben belegen und mit Sahne garnieren."
       },
       {
-        id: 7,
+        id: "b7",
         title_de: "Mascarpone Beeren-Müsli",
         title_ru: "Ягодные мюсли с маскарпоне",
         calories: 890,
@@ -79,7 +79,7 @@ const mealsData = {
         recipe_de: "Mascarpone mit Milch und Honig glattrühren. Knuspermüsli und Himbeeren untermischen."
       },
       {
-        id: 8,
+        id: "b8",
         title_de: "Snickers Energy Oats",
         title_ru: "Энергетическая овсянка Сникерс",
         calories: 930,
@@ -90,7 +90,7 @@ const mealsData = {
         recipe_de: "Haferflocken in Milch mit Kakao kochen. Erdnussbutter einrühren und mit gesalzenen Erdnüssen bestreuen."
       },
       {
-        id: 9,
+        id: "b9",
         title_de: "Gourmet Rührei mit Schinken",
         title_ru: "Яичница гурме с ветчиной",
         calories: 840,
@@ -101,7 +101,7 @@ const mealsData = {
         recipe_de: "Schinken in Butter anbraten, Eier dazugeben und rühren. Mit Käse bestreuen, mit Toast servieren."
       },
       {
-        id: 10,
+        id: "b10",
         title_de: "Süßer Quark-Milchreis",
         title_ru: "Сладкий творожный мильхрайс",
         calories: 860,
@@ -112,7 +112,7 @@ const mealsData = {
         recipe_de: "Fertigen Milchreis mit Quark mischen, mit Zimt und Zucker bestreuen, mit Marmelade servieren."
       },
       {
-        id: 11,
+        id: "b11",
         title_de: "Mega-Cereals mit Kakao",
         title_ru: "Мега-сухой завтрак",
         calories: 830,
@@ -123,7 +123,7 @@ const mealsData = {
         recipe_de: "Zerealien in eine Schüssel geben, Banane dazuschneiden, mit kalter Milch aufgießen."
       },
       {
-        id: 12,
+        id: "b12",
         title_de: "Gebackene Erdnuss-Bananen",
         title_ru: "Запеченные бананы с арахисом",
         calories: 870,
@@ -134,7 +134,7 @@ const mealsData = {
         recipe_de: "Bananen der Länge nach schneiden, dick mit Erdnussbutter bestreichen, mit Honig beträufeln, 10 Min. backen. Mit Zwieback essen."
       },
       {
-        id: 13,
+        id: "b13",
         title_de: "Crispy Bacon Toast Tower",
         title_ru: "Башня из тостов с беконом",
         calories: 890,
@@ -145,7 +145,7 @@ const mealsData = {
         recipe_de: "Speck knusprig braten, Eier im Bratfett braten. Sandwich mit Mayonnaise, Speck, Eiern und Käse aufbauen."
       },
       {
-        id: 14,
+        id: "b14",
         title_de: "Protein Cherry Bomb",
         title_ru: "Протеиновый вишневый шейк",
         calories: 920,
@@ -156,7 +156,7 @@ const mealsData = {
         recipe_de: "Kirschen, Quark, Haferflocken, Zucker und Milch im Mixer 1 Minute cremig rühren."
       },
       {
-        id: 15,
+        id: "b15",
         title_de: "Käse-Waffeln mit Sauerrahm",
         title_ru: "Сырные вафли со сметаной",
         calories: 850,
@@ -169,7 +169,7 @@ const mealsData = {
     ],
     lunch: [
       {
-        id: 1,
+        id: "l1",
         title_de: "Lachs mit Kartoffelpüree",
         title_ru: "Лосось с картофельным пюре",
         calories: 1050,
@@ -180,7 +180,7 @@ const mealsData = {
         recipe_de: "Kartoffeln kochen, mit Butter und Sahne stampfen. Lachs in Olivenöl von beiden Seiten je 4 Min. braten."
       },
       {
-        id: 2,
+        id: "l2",
         title_de: "Thunfisch Pasta Mozzarella",
         title_ru: "Паста с тунцом и моцареллой",
         calories: 980,
@@ -191,7 +191,7 @@ const mealsData = {
         recipe_de: "Nudeln kochen. Tomaten und Thunfisch im warmen Öl erhitzen. Mit Nudeln mischen, Mozzarella unterrühren."
       },
       {
-        id: 3,
+        id: "l3",
         title_de: "Schnelles Teriyaki-Hähnchen",
         title_ru: "Быстрое куриное филе Терияки",
         calories: 920,
@@ -202,7 +202,7 @@ const mealsData = {
         recipe_de: "Reis kochen. Hähnchen würfeln, 5 Min. braten, Teriyaki-Soße dazugeben und 1 Min. köcheln. Auf Reis servieren."
       },
       {
-        id: 4,
+        id: "l4",
         title_de: "Cheesy Thunfisch Wraps",
         title_ru: "Сырные роллы с тунцом",
         calories: 940,
@@ -213,7 +213,7 @@ const mealsData = {
         recipe_de: "Thunfisch, Mais und Mayonnaise mischen. Auf Wraps verteilen, mit Cheddar bestreuen, rollen und trocken anbraten."
       },
       {
-        id: 5,
+        id: "l5",
         title_de: "Carbonara Сheating Style",
         title_ru: "Карбонара (ленивый рецепт)",
         calories: 1080,
@@ -224,7 +224,7 @@ const mealsData = {
         recipe_de: "Nudeln kochen. Speck in Butter anbraten. Sahne, Ei und Parmesan mischen. In die heiße Pasta gießen, 1 Min. umrühren."
       },
       {
-        id: 6,
+        id: "l6",
         title_de: "Bratwurst mit Schupfnudeln",
         title_ru: "Колбаски с шупфнудельн",
         calories: 1010,
@@ -235,7 +235,7 @@ const mealsData = {
         recipe_de: "Wurstscheiben und Schupfnudeln knusprig braten. Am Ende Butter und Sauerkraut hinzufügen und erwärmen."
       },
       {
-        id: 7,
+        id: "l7",
         title_de: "Cheeseburger Pasta",
         title_ru: "Паста Чизбургер",
         calories: 1040,
@@ -246,7 +246,7 @@ const mealsData = {
         recipe_de: "Hackfleisch mit Zwiebel anbraten, Tomatenmark und Sahne hinzufügen. Mit gekochten Nudeln mischen, Cheddar schmelzen lassen."
       },
       {
-        id: 8,
+        id: "l8",
         title_de: "Deftige Tortellini-Pfanne",
         title_ru: "Питательная сковорода тортеллини",
         calories: 960,
@@ -257,7 +257,7 @@ const mealsData = {
         recipe_de: "Tortellini 3 Min. kochen. Schinken und Erbsen in Butter anbraten, Tortellini dazugeben, mit Crème fraîche verrühren."
       },
       {
-        id: 9,
+        id: "l9",
         title_de: "Käse-Spätzle Original",
         title_ru: "Сырные шпецле",
         calories: 1020,
@@ -268,7 +268,7 @@ const mealsData = {
         recipe_de: "Spätzle in Butter anbraten, Sahne und Käse einrühren, schmelzen lassen. Mit Röstzwiebeln bestreuen."
       },
       {
-        id: 10,
+        id: "l10",
         title_de: "Minitopf Chili con Carne",
         title_ru: "Чили кон карне",
         calories: 930,
@@ -279,7 +279,7 @@ const mealsData = {
         recipe_de: "Hackfleisch anbraten, Tomaten, gespülte Bohnen und Mais hinzugeben. 10 Min. köcheln. Mit Toast servieren."
       },
       {
-        id: 11,
+        id: "l11",
         title_de: "Crispy Chicken Nuggets & Rice",
         title_ru: "Куриные наггетсы с рисом",
         calories: 970,
@@ -290,7 +290,7 @@ const mealsData = {
         recipe_de: "Reis kochen. Nuggets in reichlich Öl goldbraun anbraten (6-8 Min.). Mit Sauce servieren."
       },
       {
-        id: 12,
+        id: "l12",
         title_de: "Wiener Würstchen Deluxe",
         title_ru: "Венские сосиски Делюкс",
         calories: 910,
@@ -301,7 +301,7 @@ const mealsData = {
         recipe_de: "Würstchen 5 Min. im heißen Wasser erwärmen. Mit fertigem Kartoffelsalat, Brötchen und Senf servieren."
       },
       {
-        id: 13,
+        id: "l13",
         title_de: "Gnocchi in Gorgonzola-Soße",
         title_ru: "Ньокки под соусом Горгонзола",
         calories: 1060,
@@ -312,7 +312,7 @@ const mealsData = {
         recipe_de: "Gnocchi 5 Min. in Butter braten. Gorgonzola in Sahne schmelzen lassen. Soße über Gnocchi geben, mit Nüssen bestreuen."
       },
       {
-        id: 14,
+        id: "l14",
         title_de: "Fleischbällchen в томатном соусе",
         title_ru: "Фрикадельки в томатном соусе",
         calories: 950,
@@ -323,7 +323,7 @@ const mealsData = {
         recipe_de: "Nudeln kochen. Frikadellen schneiden und in Tomatensoße erwärmen. Mit Nudeln mischen, mit Käse bestreuen."
       },
       {
-        id: 15,
+        id: "l15",
         title_de: "Maultaschen geschmälzt",
         title_ru: "Маульташен с луком",
         calories: 990,
@@ -336,7 +336,7 @@ const mealsData = {
     ],
     night: [
       {
-        id: 1,
+        id: "n1",
         title_de: "Overnight Oats (vorbereitet)",
         title_ru: "Ленивая ночная овсянка",
         calories: 680,
@@ -348,7 +348,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Zutaten tagsüber im Glas mischen, in den Kühlschrank stellen. Nachts leise herausholen und essen."
       },
       {
-        id: 2,
+        id: "n2",
         title_de: "Premium Croissants mit Kakao",
         title_ru: "Премиум круассаны с какао",
         calories: 760,
@@ -360,7 +360,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Croissants schneiden, mit Frischkäse bestreichen, Schinken dazugeben. Mit kaltem Kakao trinken."
       },
       {
-        id: 3,
+        id: "n3",
         title_de: "Nuss-Toast Double Impact",
         title_ru: "Арахисовые тосты Дабл-Импакт",
         calories: 790,
@@ -372,7 +372,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Toastbrot (nicht toasten!) mit Pasten bestreichen, Bananenscheiben dazulegen, zuklappen. Mit Saft trinken."
       },
       {
-        id: 4,
+        id: "n4",
         title_de: "Kalter Fleisch-Snack",
         title_ru: "Холодный мясной бургер-блиц",
         calories: 670,
@@ -384,7 +384,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Laugenstange aufschneiden, mit Remoulade bestreichen, kalte Frikadellen und Käse hineinlegen."
       },
       {
-        id: 5,
+        id: "n5",
         title_de: "Schoko-Milchbrötchen Attack",
         title_ru: "Сладкие молочные булочки",
         calories: 710,
@@ -396,7 +396,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Schoko-Milchbrötchen aufschneiden, mit Butter bestreichen. Mit Kakao oder Milch trinken."
       },
       {
-        id: 6,
+        id: "n6",
         title_de: "Tuna-Mayo Cold Sandwich",
         title_ru: "Холодный тунец-сэндвич с майонезом",
         calories: 740,
@@ -408,7 +408,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Thunfisch in einer Tasse leise mit Mayonnaise zerdrücken. Auf Brot verteilen, mit Käse und Brot abdecken."
       },
       {
-        id: 7,
+        id: "n7",
         title_de: "Süße Waffel-Sandwiches",
         title_ru: "Сладкие яичные вафли-сэндвичи",
         calories: 730,
@@ -420,7 +420,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Weiche Waffeln aus der Packung nehmen. Sandwiches machen: zwei mit Nutella, zwei mit Erdnussbutter."
       },
       {
-        id: 8,
+        id: "n8",
         title_de: "Laugen-Lachs Bagel",
         title_ru: "Сдобный бейгл с лососем",
         calories: 690,
@@ -432,7 +432,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Laugenbrot aufschneiden, dick mit Frischkäse bestreichen, kalten Räucherlachs hineinlegen."
       },
       {
-        id: 9,
+        id: "n9",
         title_de: "Bananen-Quark im Becher",
         title_ru: "Творожный банановый крем",
         calories: 720,
@@ -444,7 +444,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Banane in einer Schüssel mit Quark und Honig zerdrücken. Kekse zerkrümeln, einmischen."
       },
       {
-        id: 10,
+        id: "n10",
         title_de: "Snack-Platte Midnight",
         title_ru: "Снэк-тарелка Полуночник",
         calories: 780,
@@ -456,7 +456,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Kabanossi, Käsewürfel und Salzstangen auf einen Teller legen und leise naschen."
       },
       {
-        id: 11,
+        id: "n11",
         title_de: "Studentenfutter Мега-Доза",
         title_ru: "Студенческая смесь орехов",
         calories: 660,
@@ -468,7 +468,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Studentenfutter öffnen, im Zimmer essen und mit Milch Banane trinken."
       },
       {
-        id: 12,
+        id: "n12",
         title_de: "Kalter Tortilla Wrap",
         title_ru: "Холодный ролл-тортилья",
         calories: 680,
@@ -480,7 +480,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Tortilla mit Frischkäse und Mayo bestreichen, Schinken und geriebenen Käse aufrollen, kalt essen."
       },
       {
-        id: 13,
+        id: "n13",
         title_de: "Donuts & Chocomel Duo",
         title_ru: "Донаты с какао Chocomel",
         calories: 750,
@@ -492,7 +492,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Donuts aus der Packung nehmen. Mit kaltem Kakao trinken."
       },
       {
-        id: 14,
+        id: "n14",
         title_de: "Fladenbrot Schafskäse Fast",
         title_ru: "Четверть лепешки с брынзой",
         calories: 710,
@@ -504,7 +504,7 @@ const mealsData = {
         recipe_de: "[ПОЛНАЯ ТИШИНА] Käse und Tomaten schneiden, mit Öl beträufeln, Tasche aufschneiden und befüllen."
       },
       {
-        id: 15,
+        id: "n15",
         title_de: "Schoko-Muffin Deluxe",
         title_ru: "Шоколадные маффины",
         calories: 690,
