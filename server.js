@@ -352,8 +352,14 @@ Instructions:
   return data;
 }
 
+const changelogCache = {};
+
 // Gemini 2.5 Flash Release Notes Generator
 async function generateChangelog(version, rawChanges) {
+  if (changelogCache[version]) {
+    return changelogCache[version];
+  }
+
   if (!rawChanges) {
     rawChanges = "Небольшие улучшения стабильности и производительности.";
     if (changelogData.history && changelogData.history[version]) {
@@ -388,7 +394,11 @@ Output JSON structure:
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
     const data = safeJsonParse(text);
-    return data.points || [];
+    const points = data.points || [];
+    if (points.length > 0) {
+      changelogCache[version] = points;
+    }
+    return points;
   } catch (err) {
   logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
     console.error("Changelog generation failed:", err);
@@ -1502,8 +1512,13 @@ app.post('/api/meals/replace-ready', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/telegram-webhook', (req, res) => {
-  bot.handleUpdate(req.body);
+app.post('/api/telegram-webhook', async (req, res) => {
+  try {
+    await bot.init();
+    await bot.handleUpdate(req.body);
+  } catch (err) {
+    console.error("Telegram webhook handling error:", err);
+  }
   res.sendStatus(200);
 });
 
