@@ -195,6 +195,9 @@ function filterPastMeals(meals, schedule) {
       activeMeals[key] = meals[key];
     }
   }
+  if (Object.keys(activeMeals).length === 0) {
+    return meals;
+  }
   return activeMeals;
 }
 
