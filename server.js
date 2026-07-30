@@ -1,16 +1,12 @@
-import express from 'express';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import 'dotenv/config';
-import { Bot } from 'grammy';
-import Groq from 'groq-sdk';
-import { createClient } from '@supabase/supabase-js';
-import ws from 'ws';
-import mealsData from './src/data/meals.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+require('dotenv').config();
+const { Bot } = require('grammy');
+const Groq = require('groq-sdk');
+const { createClient } = require('@supabase/supabase-js');
+const ws = require('ws');
+const mealsData = require('./src/data/meals.js');
 
 // Initialize Supabase Client
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -1482,6 +1478,8 @@ app.post('/api/meals/replace-ready', requireAuth, async (req, res) => {
     console.error("Ready-to-eat replacement failed:", err);
     return res.status(500).json({ error: "Alternative generation failed: " + err.message });
   }
+});
+
 app.get('/api/debug', async (req, res) => {
   const userId = req.query.userId;
   if (!userId) return res.json({ error: "no userId" });

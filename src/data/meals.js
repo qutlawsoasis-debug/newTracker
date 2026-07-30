@@ -1037,4 +1037,7 @@ const mealsData = {
   }
 };
 
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = mealsData;
+}
 export default mealsData;
