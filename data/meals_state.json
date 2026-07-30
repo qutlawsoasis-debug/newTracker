@@ -1,0 +1,255 @@
+{
+  "8319427555": {
+    "meals": {
+      "lunch": {
+        "id": 5,
+        "icon": "carbonara",
+        "calories": 1080,
+        "title_de": "Carbonara Сheating Style",
+        "title_ru": "Карбонара (ленивый рецепт)",
+        "recipe_de": "Nudeln kochen. Speck in Butter anbraten. Sahne, Ei und Parmesan mischen. In die heiße Pasta gießen, 1 Min. umrühren.",
+        "recipe_ru": "Сварить спагетти. Обжарить бекон на масле. Смешать сливки, яйцо и пармезан. Вылить в горячую пасту с беконом, мешать 1 мин.",
+        "products_de": [
+          "Spaghetti (120g)",
+          "Speck / Bacon (70g)",
+          "Sahne (150ml)",
+          "1 Ei",
+          "Geriebener Parmesan (40g)",
+          "Butter (10g)"
+        ],
+        "products_ru": [
+          "Спагетти (120г)",
+          "Бекон (70г)",
+          "Сливки (150мл)",
+          "1 яйцо",
+          "Тертый сыр Пармезан (40г)",
+          "Сливочное масло (10г)"
+        ]
+      },
+      "night": {
+        "id": 3,
+        "icon": "nut_toast",
+        "calories": 790,
+        "title_de": "Nuss-Toast Double Impact",
+        "title_ru": "Арахисовые тосты Дабл-Импакт",
+        "is_silent": true,
+        "recipe_de": "[ПОЛНАЯ ТИШИНА] Toastbrot (nicht toasten!) mit Pasten bestreichen, Bananenscheiben dazulegen, zuklappen. Mit Saft trinken.",
+        "recipe_ru": "[ПОЛНАЯ ТИШИНА] Намазать хлеб (без тостера!) пастами, выложить кружочки банана, сделать закрытые сэндвичи. Запить соком.",
+        "products_de": [
+          "Toastbrot (3 Scheiben)",
+          "Erdnussbutter (2 TL)",
+          "Nutella (2 TL)",
+          "1 Banane",
+          "Multivitaminsaft (300ml)"
+        ],
+        "products_ru": [
+          "Хлеб для тостов (3 куска)",
+          "Арахисовое масло (2 ч.л.)",
+          "Нутелла (2 ч.л.)",
+          "1 банан",
+          "Мультивитаминный сок (300мл)"
+        ]
+      },
+      "snack": {
+        "id": "ai-snack",
+        "icon": "trail_mix",
+        "calories": 474,
+        "title_de": "REWE Skyr mit Studentenfutter und Honig",
+        "title_ru": "Йогурт Скир из REWE с ореховой смесью и медом",
+        "is_silent": true,
+        "recipe_de": "Den Skyr in eine Schüssel geben, mit Honig süßen und das Studentenfutter unterrühren.",
+        "recipe_ru": "Выложить скир в миску, подсластить медом и вмешать смесь орехов и изюма.",
+        "products_de": [
+          "Ja! Skyr Natur (200g)",
+          "REWE Beste Wahl Studentenfutter (70g)",
+          "Bienenhonig (1 TL)"
+        ],
+        "products_ru": [
+          "Натуральный Скир Ja! (200г)",
+          "Студенческая смесь REWE Beste Wahl (70г)",
+          "Пчелиный мед (1 ч.л.)"
+        ]
+      },
+      "breakfast": {
+        "id": 2,
+        "icon": "choco_shake",
+        "calories": 950,
+        "title_de": "Schoko-Bananen Shake",
+        "title_ru": "Шоколадно-банановый шейк",
+        "recipe_de": "Alle Zutaten 40 Sekunden im Mixer pürieren. Schnell am Computer trinken.",
+        "recipe_ru": "Все ингредиенты взбить в блендере 40 секунд. Быстро выпить у компьютера.",
+        "products_de": [
+          "Vollmilch 3.5% (350ml)",
+          "1 Banane",
+          "Haferflocken (60g)",
+          "Nutella (2 große EL)",
+          "Speisequark 40% (100g)"
+        ],
+        "products_ru": [
+          "Цельное молоко 3.5% (350мл)",
+          "1 банан",
+          "Овсяные хлопья (60г)",
+          "Нутелла (2 ст.л.)",
+          "Жирный творог 40% (100г)"
+        ]
+      }
+    },
+    "date": "Sun Jun 28 2026",
+    "version": "1.3.6",
+    "schedule": {
+      "wakeTime": "08:00",
+      "bedTime": "23:00",
+      "notifications": true,
+      "remind1h": true
+    },
+    "profile": {
+      "gender": "M",
+      "age": 30,
+      "height": 190,
+      "weight": 82,
+      "activity": 1.5,
+      "goal": "gain",
+      "targetCalories": 3294,
+      "aiAnalysisText": "Ваш базовый уровень метаболизма составляет 1863 ккал. Чтобы успешно набирать массу с целевым показателем в 3294 ккал, вам понадобятся плотные источники калорий. Рекомендуем обратить внимание на арахисовую пасту Ja! и цельное молоко 3.8% из немецких супермаркетов REWE или ALDI для легкого достижения профицита.",
+      "subscriptionStatus": "premium",
+      "subscriptionExpiresAt": "2026-07-27T20:22:48.901+00:00",
+      "user_ip": "80.187.87.59",
+      "country": "ФРГ",
+      "region_name": "Бавария",
+      "city": "Мюнхен"
+    },
+    "eatenMeals": [],
+    "weightHistory": [
+      {
+        "date": "27.06",
+        "weight": 58
+      },
+      {
+        "date": "28.06",
+        "weight": 50
+      }
+    ],
+    "tzOffset": -120,
+    "sentNotifications": {
+      "2026-6-27": {
+        "breakfast_1h": true,
+        "breakfast_now": true,
+        "lunch_1h": true,
+        "lunch_now": true,
+        "snack_1h": true,
+        "snack_now": true
+      }
+    }
+  },
+  "5941010722": {
+    "meals": {
+      "lunch": {
+        "id": 209,
+        "icon": "cheese_spaetzle",
+        "calories": 540,
+        "title_de": "Käsespätzle Light",
+        "title_ru": "Легкие сырные шпецле",
+        "recipe_de": "Spätzle in Gemüsebrühe erhitzen, Käse unterrühren und schmelzen lassen. Mit Röstzwiebeln und Schnittlauch garnieren.",
+        "recipe_ru": "Прогреть шпецле в овощном бульоне, засыпать легким тертым сыром до расплавления. Украсить жареным и зеленым луком.",
+        "products_de": [
+          "Frische Spätzle (150g)",
+          "Gouda light 15% gerieben (50g)",
+          "Röstzwiebeln (1.5 EL)",
+          "Gemüsebrühe (50ml)",
+          "Schnittlauch"
+        ],
+        "products_ru": [
+          "Свежие шпецле (150г)",
+          "Легкий тертый сыр Гауда 15% (50г)",
+          "Сухой жареный лук (1.5 ст.л.)",
+          "Овощной бульон (50мл)",
+          "Зеленый лук"
+        ]
+      },
+      "night": {
+        "id": 309,
+        "icon": "banana_quark",
+        "calories": 420,
+        "title_de": "Bananen-Quark Dessert Light",
+        "title_ru": "Творожный банановый крем Лайт",
+        "is_silent": true,
+        "recipe_de": "[ПОЛНАЯ ТИШИНА] Banane mit Quark und zuckerfreiem Sirup zerdrücken. Kekse zerkrümeln, unterheben.",
+        "recipe_ru": "[ПОЛНАЯ ТИШИНА] Размять банан с творогом 0.2% и сладким сиропом без калорий. Печенье поломать и смешать в массу.",
+        "products_de": [
+          "Magerquark 0.2% (200g)",
+          "Halbe Banane",
+          "Zuckerfreier Sirup (1 EL)",
+          "Dinkel-Kekse zuckerarm (2 Stück)"
+        ],
+        "products_ru": [
+          "Творог 0.2% (200г)",
+          "Половина банана",
+          "Сироп без сахара (1 ст.л.)",
+          "Диетическое овсяное печенье (2 шт)"
+        ]
+      },
+      "breakfast": {
+        "id": 101,
+        "icon": "oats_bowl",
+        "calories": 450,
+        "title_de": "Leichte Haferflocken Bowl",
+        "title_ru": "Легкая овсяная чаша",
+        "recipe_de": "Haferflocken in ungesüßter Hafermilch 5 Min. kochen. Mit Erdbeeren und Mandelmus anrichten, mit Erythrit süßen.",
+        "recipe_ru": "Овсянку отварить в овсяном молоке 5 минут. Подать с клубникой и миндальной пастой, подсластить эритритом.",
+        "products_de": [
+          "Zarte Haferflocken (60g)",
+          "Hafermilch ungesüßt (200ml)",
+          "Erdbeeren (50g)",
+          "Mandelmus (1 TL)",
+          "Erythrit"
+        ],
+        "products_ru": [
+          "Нежная овсянка (60г)",
+          "Овсяное молоко без сахара (200мл)",
+          "Клубника (50г)",
+          "Миндальная паста (1 ч.л.)",
+          "Эритрит"
+        ]
+      }
+    },
+    "date": "Sun Jun 28 2026",
+    "version": "1.3.6",
+    "schedule": {
+      "wakeTime": "08:00",
+      "bedTime": "23:00",
+      "notifications": true,
+      "remind1h": true
+    },
+    "profile": {
+      "gender": "F",
+      "age": 19,
+      "height": 159,
+      "weight": 50,
+      "activity": 1.5,
+      "goal": "maintain",
+      "targetCalories": 1857,
+      "aiAnalysisText": "Ваш базовый метаболизм (BMR) составляет примерно 1238 ккал в день. Чтобы поддерживать ваш текущий вес, вам необходимо около 1857 ккал ежедневно. Для сбалансированного рациона из немецких супермаркетов, таких как REWE, ALDI или LIDL, выбирайте нежирный творог (Magerquark), Скир (Skyr) и куриную грудку (Hähnchenbrust), которые помогут вам легко достичь ваших целей.",
+      "subscriptionStatus": "premium",
+      "subscriptionExpiresAt": "2026-07-27T17:43:15.543+00:00",
+      "user_ip": "92.208.13.238",
+      "country": "Германия",
+      "region_name": "Северный Рейн — Вестфалия",
+      "city": "Минден, Rechtes Weserufer"
+    },
+    "eatenMeals": [],
+    "weightHistory": [
+      {
+        "date": "27.06",
+        "weight": 58
+      }
+    ],
+    "tzOffset": -120,
+    "sentNotifications": {
+      "2026-6-27": {
+        "lunch_1h": true,
+        "lunch_now": true
+      }
+    },
+    "lastNotifiedVersion": "1.3.6"
+  }
+}
