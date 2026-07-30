@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import CalorieCounter from "./components/CalorieCounter";
 import MealCard from "./components/MealCard";
 import AIChat from "./components/AIChat";
+import OnboardingScreen from "./components/OnboardingScreen";
 import changelogData from "../changelog.json";
 import { calculateTargetMacros, calculateEatenMacros } from "./utils/macros";
 import { Utensils, LineChart, Calendar, User, MessageCircle } from "lucide-react";
@@ -522,6 +523,8 @@ function App() {
     return [{ date: dateStr, weight: parseFloat(weight) }];
   }, []);
 
+  const [isNewUser, setIsNewUser] = useState(false);
+
   const [onboardingForm, setOnboardingForm] = useState({
     gender: "M",
     age: "",
@@ -543,6 +546,12 @@ function App() {
         }
         const data = await res.json();
         
+        if (data.isNewUser || !data.profile) {
+          setIsNewUser(true);
+        } else {
+          setIsNewUser(false);
+        }
+
         if (data.profile) {
           setProfile(data.profile);
         }
@@ -590,6 +599,47 @@ function App() {
 
     fetchState();
   }, [userId, tgUser]);
+
+  const handleOnboardingComplete = useCallback(async (onboardingData) => {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          ...onboardingData
+        })
+      });
+      if (!res.ok) throw new Error("HTTP error " + res.status);
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server error: " + res.status);
+      }
+      const profileData = await res.json();
+      if (profileData.profile) {
+        setProfile(profileData.profile);
+      }
+
+      // Fetch newly generated meal plan
+      const mealsRes = await fetch(`/api/meals?userId=${userId}&regenerate=true`);
+      if (mealsRes.ok) {
+        const mContentType = mealsRes.headers.get("content-type");
+        if (mContentType && mContentType.includes("application/json")) {
+          const mData = await mealsRes.json();
+          if (mData.meals) {
+            setMeals(mData.meals);
+          }
+          if (mData.globalAnalytics) {
+            setGlobalAnalytics(mData.globalAnalytics);
+          }
+        }
+      }
+      setIsNewUser(false);
+    } catch (err) {
+      console.error("Onboarding completion failed:", err);
+      alert("Error creating profile: " + err.message);
+    }
+  }, [userId]);
 
   // Persist schedule, meals, profile, and eaten state updates
   useEffect(() => {
@@ -1365,6 +1415,10 @@ function App() {
 
   const isNewUserToday = profile?.createdAt && new Date(profile.createdAt).toDateString() === new Date().toDateString();
   const noMealsLogged = eatenMeals.length === 0;
+
+  if (isLoaded && (isNewUser || !profile)) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} lang={lang} />;
+  }
 
   // ─── Main Interface ───
   return (

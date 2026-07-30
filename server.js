@@ -1253,7 +1253,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
   // Fallback to local userStates cache if database is empty/disabled
 
   if (!profile) {
-    return res.json({ meals: null, profile: null });
+    return res.json({ meals: null, profile: null, isNewUser: true });
   }
 
   const { targetCalories, aiAnalysisText } = profile;
