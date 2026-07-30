@@ -1789,7 +1789,9 @@ function App() {
               profile.subscriptionStatus === "premium" ? (
                 <div className="bg-zinc-950 text-white rounded-xl border border-zinc-800 p-5 mb-5 shadow-sm">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Subscription</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                      {lang === "ru" ? "ПОДПИСКА" : "ABO"}
+                    </span>
                     <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-white text-zinc-950">Premium</span>
                   </div>
                   <p className="text-xs text-zinc-300 leading-relaxed font-semibold">
@@ -1801,7 +1803,9 @@ function App() {
               ) : (
                 <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-5 mb-5 shadow-sm">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Subscription</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                      {lang === "ru" ? "ПОДПИСКА" : "ABO"}
+                    </span>
                     <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-zinc-200 text-zinc-600">Free</span>
                   </div>
                   <p className="text-xs text-zinc-500 mb-4 leading-relaxed font-medium">
