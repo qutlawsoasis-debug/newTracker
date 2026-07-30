@@ -1359,6 +1359,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
 
 // API to save general schedule settings and check weight logs
 app.post('/api/meals', requireAuth, async (req, res) => {
+  console.log("POST /api/meals userId:", req.body?.userId);
   const { meals, date, version, schedule, tzOffset, profile, eatenMeals, weightHistory } = req.body;
   const userId = req.user.id;
   if (!meals || !date || !version) {
