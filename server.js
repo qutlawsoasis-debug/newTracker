@@ -301,15 +301,22 @@ Output JSON structure:
   "snack": { ... } // (Include ONLY if needed to cover the remaining calorie deficit)
 }`;
 
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      { role: "system", content: systemInstruction },
-      { role: "user", content: prompt }
-    ],
-    max_tokens: 1000,
-    response_format: { type: "json_object" }
-  });
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Groq API request timed out after 9 seconds")), 9000)
+  );
+
+  const completion = await Promise.race([
+    groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: systemInstruction },
+        { role: "user", content: prompt }
+      ],
+      max_tokens: 1000,
+      response_format: { type: "json_object" }
+    }),
+    timeoutPromise
+  ]);
 
   const text = completion.choices[0].message.content.trim();
   const data = safeJsonParse(text);
@@ -362,15 +369,22 @@ Instructions:
   "is_silent": ${section === 'night' ? 'true' : 'false'}
 }`;
 
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      { role: "system", content: systemInstruction },
-      { role: "user", content: prompt }
-    ],
-    max_tokens: 1000,
-    response_format: { type: "json_object" }
-  });
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Groq API request timed out after 9 seconds")), 9000)
+  );
+
+  const completion = await Promise.race([
+    groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: systemInstruction },
+        { role: "user", content: prompt }
+      ],
+      max_tokens: 1000,
+      response_format: { type: "json_object" }
+    }),
+    timeoutPromise
+  ]);
 
   const text = completion.choices[0].message.content.trim();
   const data = safeJsonParse(text);

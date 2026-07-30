@@ -460,6 +460,10 @@ function App() {
         })
       });
       if (!res.ok) throw new Error("HTTP error " + res.status);
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server error: " + res.status);
+      }
       const data = await res.json();
       if (data.profile) {
         setProfile(data.profile);
@@ -492,6 +496,10 @@ function App() {
         body: JSON.stringify({ userId })
       });
       if (!res.ok) throw new Error("HTTP error " + res.status);
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server error: " + res.status);
+      }
       const data = await res.json();
       if (data.success && profile) {
         setProfile(prev => ({
@@ -529,6 +537,10 @@ function App() {
       try {
         const res = await fetch(`/api/meals?userId=${userId}`);
         if (!res.ok) throw new Error("HTTP error " + res.status);
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Server error: " + res.status);
+        }
         const data = await res.json();
         
         if (data.profile) {
@@ -559,6 +571,10 @@ function App() {
         try {
           const changelogRes = await fetch(`/api/changelog?version=${DATA_VERSION}&userId=${userId}`);
           if (changelogRes.ok) {
+            const changelogContentType = changelogRes.headers.get("content-type");
+            if (!changelogContentType || !changelogContentType.includes("application/json")) {
+              throw new Error("Server error: " + changelogRes.status);
+            }
             const changelogData = await changelogRes.json();
             setChangelog(changelogData);
           }
@@ -599,6 +615,10 @@ function App() {
               })
             });
             if (res.ok) {
+              const contentType = res.headers.get("content-type");
+              if (!contentType || !contentType.includes("application/json")) {
+                throw new Error("Server error: " + res.status);
+              }
               const data = await res.json();
               if (data.globalAnalytics) {
                 setGlobalAnalytics(data.globalAnalytics);
@@ -662,6 +682,10 @@ function App() {
     try {
       const res = await fetch(`/api/meals?userId=${userId}`);
       if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Server error: " + res.status);
+        }
         const data = await res.json();
         if (data.meals && data.meals[section]) {
           setMeals(prev => ({
@@ -687,6 +711,10 @@ function App() {
         body: JSON.stringify({ userId, section, lang })
       });
       if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Server error: " + res.status);
+        }
         const data = await res.json();
         if (data.meal) {
           setMeals(prev => ({
@@ -795,6 +823,10 @@ function App() {
     setIsRegenerating(true);
     try {
       const res = await fetch(`/api/meals?userId=${userId}&regenerate=true`);
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server error: " + res.status);
+      }
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || "Generation error");
@@ -844,6 +876,10 @@ function App() {
         })
       });
 
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server error: " + res.status);
+      }
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || "Failed to calculate profile");
@@ -857,6 +893,10 @@ function App() {
         // Immediately generate initial meals
         const mealsRes = await fetch(`/api/meals?userId=${userId}&regenerate=true`);
         if (mealsRes.ok) {
+          const mealsContentType = mealsRes.headers.get("content-type");
+          if (!mealsContentType || !mealsContentType.includes("application/json")) {
+            throw new Error("Server error: " + mealsRes.status);
+          }
           const mealsData = await mealsRes.json();
           if (mealsData.meals) {
             setMeals(mealsData.meals);
@@ -880,6 +920,10 @@ function App() {
         body: JSON.stringify({ userId, lat, lon })
       });
       if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Server error: " + res.status);
+        }
         const data = await res.json();
         if (data && data.profile) {
           setProfile(prev => prev ? {
@@ -976,6 +1020,10 @@ function App() {
         })
       });
 
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server error: " + res.status);
+      }
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || "Profile calculation error");
@@ -988,6 +1036,10 @@ function App() {
         // Auto-regenerate meals to align with the new profile target immediately
         const mealsRes = await fetch(`/api/meals?userId=${userId}&regenerate=true`);
         if (mealsRes.ok) {
+          const mealsContentType = mealsRes.headers.get("content-type");
+          if (!mealsContentType || !mealsContentType.includes("application/json")) {
+            throw new Error("Server error: " + mealsRes.status);
+          }
           const mealsData = await mealsRes.json();
           if (mealsData.meals) {
             setMeals(mealsData.meals);
