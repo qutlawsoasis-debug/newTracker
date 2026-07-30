@@ -335,7 +335,7 @@ function App() {
     return [];
   });
 
-  const [isLoaded, setIsLoaded] = useState(!tgUser?.id);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   
@@ -634,6 +634,26 @@ function App() {
           }
         }
       }
+      // Record initial weight entry to history for graph initialization
+      if (onboardingData.weight) {
+        const today = new Date();
+        const dateStr = `${String(today.getDate()).padStart(2, "0")}.${String(today.getMonth() + 1).padStart(2, "0")}`;
+        try {
+          await fetch("/api/weight-history", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId,
+              weight: parseFloat(onboardingData.weight),
+              date: dateStr
+            })
+          });
+          setWeightHistory([{ date: dateStr, weight: parseFloat(onboardingData.weight) }]);
+        } catch (wErr) {
+          console.error("Failed to record onboarding weight history:", wErr);
+        }
+      }
+
       setIsNewUser(false);
     } catch (err) {
       console.error("Onboarding completion failed:", err);

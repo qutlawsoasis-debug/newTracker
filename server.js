@@ -490,6 +490,34 @@ app.get('/api/weight-history', requireAuth, async (req, res) => {
   return res.json({ weightHistory });
 });
 
+// API to record new weight history entry
+app.post('/api/weight-history', requireAuth, async (req, res) => {
+  const userId = req.user.id;
+  const { weight, date } = req.body;
+  if (!weight) {
+    return res.status(400).json({ error: "Missing weight" });
+  }
+
+  const dateStr = date || getTodayDateStr();
+  const numWeight = parseFloat(weight);
+
+  if (supabase) {
+    try {
+      await supabase.from('weight_history').upsert({
+        telegram_id: userId.toString(),
+        date: dateStr,
+        weight: numWeight
+      });
+    } catch (err) {
+      logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
+      console.error("Failed to insert weight history:", err);
+      return res.status(500).json({ error: "Failed to save weight entry" });
+    }
+  }
+
+  return res.json({ success: true, entry: { date: dateStr, weight: numWeight } });
+});
+
 const ensureUserGeolocation = async (userId, profileData, req) => {
   if (!supabase || !profileData || !userId) return profileData;
 
