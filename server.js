@@ -123,6 +123,31 @@ async function logSystemError(userId, source, logType, message, stackTrace, cont
 const app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+app.use(async (req, res, next) => {
+  const start = Date.now();
+  const userId = req.body?.userId || req.query?.userId || req.headers['x-user-id'] || 'unknown';
+  
+  res.on('finish', async () => {
+    if (!supabase) return;
+    try {
+      await supabase.from('app_logs').insert({
+        user_id: String(userId),
+        method: req.method,
+        endpoint: req.path,
+        status_code: res.statusCode,
+        duration_ms: Date.now() - start,
+        error_message: res.statusCode >= 400 ? (res.locals.errorMessage || null) : null,
+        metadata: {
+          query: req.query,
+          userAgent: req.headers['user-agent']
+        }
+      });
+    } catch(e) {}
+  });
+  next();
+});
+
 app.use('/api', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   next();
@@ -1484,6 +1509,26 @@ app.get('/api/debug', async (req, res) => {
     mealsExist: !!meals,
     mealsDate: meals?.date || null
   });
+});
+
+app.get('/api/logs', async (req, res) => {
+  const limit = parseInt(req.query.limit) || 50;
+  const userId = req.query.userId;
+  
+  if (!supabase) {
+    return res.json({ logs: [], error: "Supabase client not initialized" });
+  }
+
+  let query = supabase
+    .from('app_logs')
+    .select('*')
+    .order('timestamp', { ascending: false })
+    .limit(limit);
+    
+  if (userId) query = query.eq('user_id', String(userId));
+  
+  const { data, error } = await query;
+  res.json({ logs: data || [], error: error?.message });
 });
 
 app.post('/api/telegram-webhook', async (req, res) => {
