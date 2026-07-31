@@ -927,7 +927,15 @@ app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
 
     console.log("Creating invoice link for userId:", userId);
 
-    const invoiceLink = await bot.api.callApi("createInvoiceLink", {
+    const createInvoiceFn = bot.api.createInvoiceLink 
+      ? bot.api.createInvoiceLink.bind(bot.api)
+      : (bot.api.raw?.createInvoiceLink ? bot.api.raw.createInvoiceLink.bind(bot.api.raw) : null);
+
+    if (!createInvoiceFn) {
+      throw new Error("createInvoiceLink method is not available on bot.api");
+    }
+
+    const invoiceLink = await createInvoiceFn({
       title: "GainTracker Premium",
       description: "30 дней Premium: AI чат без ограничений, замена блюд, обновление меню через AI",
       payload: JSON.stringify({ userId: userId.toString(), type: "premium_30d" }),
