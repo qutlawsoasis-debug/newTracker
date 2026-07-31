@@ -936,7 +936,7 @@ app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
       payload: JSON.stringify({ userId: userId.toString(), type: "premium_30d" }),
       provider_token: "",
       currency: "XTR",
-      prices: [{ label: "Premium 30 дней", amount: 150 }]
+      prices: [{ label: "Premium 30 дней", amount: 1 }]
     });
 
     console.log("Invoice link created successfully:", invoiceLink);
