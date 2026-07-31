@@ -532,23 +532,36 @@ function App() {
   const [referrerId, setReferrerId] = useState(null);
 
   useEffect(() => {
-    // Ждём пока Telegram WebApp точно инициализируется
     const checkStartParam = () => {
-      const tgStartParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param || '';
-      console.log("Checking start_param:", tgStartParam);
-      if (tgStartParam.startsWith('ref_')) {
-        const refId = tgStartParam.replace('ref_', '');
+      // Все возможные источники
+      const tgParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param || '';
+      const urlSearch = new URLSearchParams(window.location.search);
+      const urlHash = new URLSearchParams(window.location.hash.replace('#', ''));
+      
+      const startapp = tgParam 
+        || urlSearch.get('startapp') 
+        || urlSearch.get('start')
+        || urlHash.get('startapp')
+        || urlHash.get('tgWebAppStartParam')
+        || '';
+      
+      console.log("ALL PARAMS:", {
+        tgParam,
+        search: window.location.search,
+        hash: window.location.hash,
+        startapp
+      });
+      
+      if (startapp.startsWith('ref_')) {
+        const refId = startapp.replace('ref_', '');
         console.log("Found referrerId:", refId);
         setReferrerId(refId);
       }
     };
     
-    // Проверяем сразу
     checkStartParam();
-    
-    // И через 1 секунду на случай если SDK ещё не загрузился
-    const timer = setTimeout(checkStartParam, 1000);
-    return () => clearTimeout(timer);
+    setTimeout(checkStartParam, 500);
+    setTimeout(checkStartParam, 2000);
   }, []);
 
   const [onboardingForm, setOnboardingForm] = useState({
