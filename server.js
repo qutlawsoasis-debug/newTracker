@@ -1714,6 +1714,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
 
 // Endpoint POST /api/meals/regenerate (Premium menu regeneration via Groq)
 app.post('/api/meals/regenerate', async (req, res) => {
+  console.log('regenerate: RAW body type:', typeof req.body, 'body:', JSON.stringify(req.body));
   try {
     const userId = req.body?.userId || req.query?.userId;
     console.log('regenerate: userId', userId);
