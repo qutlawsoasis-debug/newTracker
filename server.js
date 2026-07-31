@@ -1715,30 +1715,23 @@ app.get('/api/meals', requireAuth, async (req, res) => {
 // Endpoint POST /api/meals/regenerate (Premium menu regeneration via Groq)
 app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
   try {
-    const userId = req.user?.id || req.body?.userId;
-    if (!userId) {
-      return res.status(400).json({ error: 'Missing userId' });
-    }
+    const userId = req.body?.userId || req.user?.id;
+    console.log('regenerate: userId', userId);
+    
+    if (!userId) return res.status(400).json({ error: 'userId required' });
 
-    if (!supabase) {
-      return res.status(500).json({ error: 'Database not initialized' });
-    }
-
-    // 1. Fetch user profile and verify subscription_status
+    console.log('regenerate: step 1 - fetching profile');
     const { data: pData, error: pErr } = await supabase
       .from('profiles')
       .select('*')
-      .eq('telegram_id', userId.toString())
+      .eq('telegram_id', String(userId))
       .maybeSingle();
+    console.log('regenerate: step 2 - profile result', JSON.stringify(pData)?.slice(0, 200), 'error:', pErr?.message);
 
-    console.log('regenerate: userId', userId);
-    console.log('regenerate: profile', JSON.stringify(pData));
-    console.log('regenerate: groq client exists?', !!groq);
-    console.log('regenerate: GROQ_API_KEY exists?', !!process.env.GROQ_API_KEY);
+    if (!pData) return res.status(404).json({ error: 'Profile not found' });
+    if (pData.subscription_status !== 'premium') return res.status(403).json({ error: 'Premium required' });
 
-    if (!pData || pData.subscription_status !== 'premium') {
-      return res.status(403).json({ error: 'Premium required' });
-    }
+    console.log('regenerate: step 3 - groq client exists?', !!groq);
 
     const targetCalories = pData.target_calories || 2500;
 
@@ -1788,10 +1781,10 @@ app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
     });
 
     return res.json({ meals: mealsArray });
-  } catch (error) {
-    console.error('Regenerate meals error:', error.message, error.stack);
-    logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', error?.message || String(error), error?.stack || '', 'Auto-captured backend error');
-    return res.status(500).json({ error: error.message });
+  } catch (e) {
+    console.error('regenerate: FATAL', e.message, e.stack?.slice(0, 300));
+    logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', e?.message || String(e), e?.stack || '', 'Auto-captured backend error');
+    return res.status(500).json({ error: e.message });
   }
 });
 
