@@ -1457,8 +1457,9 @@ app.post('/api/profile', requireAuth, async (req, res) => {
 // API to get/generate meal plan and schedule settings
 app.get('/api/meals', requireAuth, async (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  const { regenerate } = req.query;
-  const userId = req.user.id;
+  try {
+    const { regenerate } = req.query;
+    const userId = req.user.id;
 
   let profile = null;
   let weightHistory = [];
@@ -1703,6 +1704,11 @@ app.get('/api/meals', requireAuth, async (req, res) => {
     todayScannedCalories,
     todayScannedMacros
   });
+} catch (e) {
+  console.error('GET /api/meals FATAL:', e.message, e.stack);
+  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', e?.message || String(e), e?.stack || '', 'Auto-captured backend error');
+  return res.status(500).json({ error: e.message, stack: e.stack });
+}
 });
 
 // API to save general schedule settings and check weight logs
