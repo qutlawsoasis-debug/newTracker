@@ -1015,14 +1015,17 @@ function App() {
         body: JSON.stringify({ userId })
       });
       const data = await res.json();
-      if (res.ok && data.meals) {
+      console.log('regenerate response:', JSON.stringify(data).slice(0, 300));
+      if (data.meals) {
         setMeals(data.meals);
         setEatenMeals([]); // reset eaten meals
         alert('✅ Меню обновлено!');
       } else {
-        alert(data.error || 'Ошибка генерации меню');
+        console.error('No meals in response:', data);
+        alert(data.error || 'Ошибка: меню не получено');
       }
     } catch (err) {
+      console.error('regenerate catch error:', err);
       alert('Ошибка генерации меню');
     } finally {
       setIsRegenerating(false);

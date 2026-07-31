@@ -1731,6 +1731,9 @@ app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
       .eq('telegram_id', userId.toString())
       .maybeSingle();
 
+    console.log('regenerate: userId', userId);
+    console.log('regenerate: profile', JSON.stringify(pData));
+
     if (!pData || pData.subscription_status !== 'premium') {
       return res.status(403).json({ error: 'Premium required' });
     }
@@ -1753,6 +1756,8 @@ app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
       ]
     });
 
+    console.log('regenerate: groq response', JSON.stringify(completion?.choices?.[0]?.message?.content).slice(0, 300));
+
     const text = completion.choices[0].message.content.trim();
     let cleanJson = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
     let mealsArray = [];
@@ -1763,6 +1768,8 @@ app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
       console.error("Failed to parse Groq response JSON:", cleanJson);
       throw new Error("Invalid JSON format returned from Groq");
     }
+
+    console.log('regenerate: parsed meals', JSON.stringify(mealsArray).slice(0, 300));
 
     // 4. Save in daily_plans (upsert by telegram_id + date)
     const today = new Date().toDateString();
