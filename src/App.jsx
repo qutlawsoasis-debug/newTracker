@@ -1016,14 +1016,16 @@ function App() {
         body: JSON.stringify({ userId })
       });
       const data = await res.json();
-      console.log('regenerate response:', JSON.stringify(data).slice(0, 300));
-      if (data.meals) {
+      console.log('regenerate full response:', JSON.stringify(data).slice(0, 500));
+      console.log('data.meals type:', typeof data.meals, 'length:', data.meals?.length, 'first item:', JSON.stringify(data.meals?.[0]).slice(0, 100));
+
+      if (data.meals && Array.isArray(data.meals) && data.meals.length > 0) {
         setMeals(data.meals);
-        setEatenMeals([]); // reset eaten meals
+        setEatenMeals([]);
         alert('✅ Меню обновлено!');
       } else {
-        console.error('No meals in response:', data);
-        alert(data.error || 'Ошибка: меню не получено');
+        console.error('Invalid meals response:', data);
+        alert('Ошибка: ' + (data.error || 'меню не получено'));
       }
     } catch (err) {
       console.error('regenerate catch error:', err);
