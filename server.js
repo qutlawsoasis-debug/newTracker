@@ -1687,22 +1687,54 @@ app.get('/api/meals', requireAuth, async (req, res) => {
         updated_at: new Date().toISOString()
       });
     }
-
-    return res.json({
-      targetCalories,
-      aiAnalysisText,
-      meals: fallbackMeals,
-      date: today,
-      version: DATA_VERSION,
-      schedule: planData?.schedule ? planData.schedule : null,
-      profile,
-      eatenMeals: [],
-      weightHistory,
-      globalAnalytics,
-      todayScannedCalories,
-      todayScannedMacros
-    });
   }
+
+  if (supabase) {
+    try {
+      const { data: freshProf } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('telegram_id', String(userId))
+        .maybeSingle();
+
+      if (freshProf) {
+        profile = {
+          gender: freshProf.gender,
+          age: freshProf.age,
+          height: freshProf.height,
+          weight: freshProf.weight,
+          activity: parseFloat(freshProf.activity),
+          goal: freshProf.goal,
+          targetCalories: freshProf.target_calories,
+          aiAnalysisText: freshProf.ai_analysis_text,
+          subscriptionStatus: freshProf.subscription_status || "free",
+          subscriptionExpiresAt: freshProf.subscription_expires_at || null,
+          createdAt: freshProf.created_at || null,
+          user_ip: freshProf.user_ip || null,
+          country: freshProf.country || null,
+          region_name: freshProf.region_name || null,
+          city: freshProf.city || null
+        };
+      }
+    } catch (freshErr) {
+      console.error("Error fetching fresh profile before res.json in /api/meals:", freshErr);
+    }
+  }
+
+  return res.json({
+    targetCalories,
+    aiAnalysisText,
+    meals: fallbackMeals,
+    date: today,
+    version: DATA_VERSION,
+    schedule: planData?.schedule ? planData.schedule : null,
+    profile,
+    eatenMeals: [],
+    weightHistory,
+    globalAnalytics,
+    todayScannedCalories,
+    todayScannedMacros
+  });
 });
 
 // API to save general schedule settings and check weight logs
