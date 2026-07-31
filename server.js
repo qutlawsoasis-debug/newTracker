@@ -1935,8 +1935,9 @@ app.post('/api/meals', requireAuth, async (req, res) => {
         updated_at: new Date().toISOString()
       });
     } catch (err) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
+      logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
       console.error("Failed to save state to Supabase:", err);
+      return res.status(500).json({ error: "SAVE_FAILED", message: "Не удалось сохранить данные." });
     }
   }
 

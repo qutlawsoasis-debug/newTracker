@@ -816,7 +816,13 @@ function App() {
                 tzOffset: new Date().getTimezoneOffset()
               })
             });
-            if (res.ok) {
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              if (data.error === "SAVE_FAILED" || res.status >= 400) {
+                alert("Не удалось сохранить данные. Попробуйте ещё раз.");
+                return;
+              }
+            } else {
               const contentType = res.headers.get("content-type");
               if (!contentType || !contentType.includes("application/json")) {
                 throw new Error("Server error: " + res.status);
