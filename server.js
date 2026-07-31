@@ -1796,27 +1796,42 @@ app.post('/api/telegram-webhook', async (req, res) => {
     if (update?.message?.successful_payment) {
       try {
         const payment = update.message.successful_payment;
-        let paidUserId = update.message.from?.id;
+        let rawUserId = update.message.from?.id;
         try {
           const payloadData = JSON.parse(payment.invoice_payload || '{}');
-          if (payloadData.userId) paidUserId = payloadData.userId;
+          if (payloadData.userId) rawUserId = payloadData.userId;
         } catch (e) {}
+
+        const userId = String(rawUserId || '');
+        console.log('successful_payment userId:', userId);
 
         const now = new Date();
         const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-        if (supabase && paidUserId) {
-          await supabase.from('profiles').update({
+        if (supabase && userId) {
+          const { error: updateErr } = await supabase.from('profiles').update({
             subscription_status: 'premium',
             subscription_expires_at: expiresAt,
             updated_at: new Date().toISOString()
-          }).eq('telegram_id', paidUserId.toString());
+          }).eq('telegram_id', userId);
+
+          if (updateErr) {
+            console.error("Profiles update error in successful_payment:", updateErr);
+          }
+
+          const { data: updatedProf, error: checkErr } = await supabase
+            .from('profiles')
+            .select('subscription_status, subscription_expires_at')
+            .eq('telegram_id', userId)
+            .maybeSingle();
+
+          console.log("Verified profiles update in DB:", updatedProf, checkErr ? checkErr.message : '');
 
           // Check if user was referred (+200 points to referrer)
           const { data: refRecord } = await supabase
             .from('referrals')
             .select('id, referrer_id, converted')
-            .eq('invitee_id', paidUserId.toString())
+            .eq('invitee_id', userId)
             .maybeSingle();
 
           if (refRecord && !refRecord.converted) {
@@ -1846,10 +1861,10 @@ app.post('/api/telegram-webhook', async (req, res) => {
           }
         }
 
-        if (paidUserId) {
+        if (userId) {
           try {
             await bot.api.sendMessage(
-              paidUserId.toString(),
+              userId,
               "✅ Premium активирован на 30 дней! Enjoy 🎉"
             );
           } catch (bErr) {
