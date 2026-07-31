@@ -737,6 +737,29 @@ app.get('/api/referral/raw-tables', async (req, res) => {
   return res.json({ referrals: refData || [], user_points: ptsData || [] });
 });
 
+app.get('/api/debug-reset-referral-test', async (req, res) => {
+  if (!supabase) return res.json({ error: "No Supabase connection" });
+  
+  const { data: refData, error: refErr } = await supabase
+    .from('referrals')
+    .update({ converted: false })
+    .eq('invitee_id', '5941010722')
+    .select();
+
+  const { data: ptsData, error: ptsErr } = await supabase
+    .from('user_points')
+    .update({ points: 50 })
+    .eq('telegram_id', '8319427555')
+    .select();
+
+  return res.json({
+    referrals: refData || [],
+    referrals_error: refErr?.message || null,
+    user_points: ptsData || [],
+    user_points_error: ptsErr?.message || null
+  });
+});
+
 const ensureUserGeolocation = async (userId, profileData, req) => {
   if (!supabase || !profileData || !userId) return profileData;
 
