@@ -529,12 +529,27 @@ function App() {
   }, []);
 
   const [isNewUser, setIsNewUser] = useState(false);
-  const [referrerId, setReferrerId] = useState(() => {
-    if (tgStartParam.startsWith("ref_")) {
-      return tgStartParam.replace("ref_", "");
-    }
-    return null;
-  });
+  const [referrerId, setReferrerId] = useState(null);
+
+  useEffect(() => {
+    // Ждём пока Telegram WebApp точно инициализируется
+    const checkStartParam = () => {
+      const tgStartParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param || '';
+      console.log("Checking start_param:", tgStartParam);
+      if (tgStartParam.startsWith('ref_')) {
+        const refId = tgStartParam.replace('ref_', '');
+        console.log("Found referrerId:", refId);
+        setReferrerId(refId);
+      }
+    };
+    
+    // Проверяем сразу
+    checkStartParam();
+    
+    // И через 1 секунду на случай если SDK ещё не загрузился
+    const timer = setTimeout(checkStartParam, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const [onboardingForm, setOnboardingForm] = useState({
     gender: "M",
