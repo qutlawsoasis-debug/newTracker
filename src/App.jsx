@@ -1007,28 +1007,23 @@ function App() {
 
   // Full day AI-powered menu regeneration endpoint
   const handleRegenerateMenu = async () => {
-    if (!profile) return;
     setIsRegenerating(true);
     try {
-      const res = await fetch(`/api/meals?userId=${userId}&regenerate=true`);
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server error: " + res.status);
-      }
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Generation error");
-      }
+      const res = await fetch("/api/meals/regenerate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId })
+      });
       const data = await res.json();
-      if (data.meals) {
+      if (res.ok && data.meals) {
         setMeals(data.meals);
         setEatenMeals([]); // reset eaten meals
-      }
-      if (data.globalAnalytics) {
-        setGlobalAnalytics(data.globalAnalytics);
+        alert('✅ Меню обновлено!');
+      } else {
+        alert(data.error || 'Ошибка генерации меню');
       }
     } catch (err) {
-      alert(`${translations[lang].aiError}\n${err.message}`);
+      alert('Ошибка генерации меню');
     } finally {
       setIsRegenerating(false);
     }
@@ -1541,7 +1536,7 @@ function App() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
               </svg>
               <span className="text-[11px] font-semibold text-zinc-600">
-                {isRegenerating ? translations[lang].regeneratingTitle : translations[lang].regenerateTitle}
+                {isRegenerating ? "Генерирую..." : translations[lang].regenerateTitle}
               </span>
             </button>
 

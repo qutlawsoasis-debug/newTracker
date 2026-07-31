@@ -1712,6 +1712,75 @@ app.get('/api/meals', requireAuth, async (req, res) => {
 }
 });
 
+// Endpoint POST /api/meals/regenerate (Premium menu regeneration via Groq)
+app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user?.id || req.body?.userId;
+    if (!userId) {
+      return res.status(400).json({ error: 'Missing userId' });
+    }
+
+    if (!supabase) {
+      return res.status(500).json({ error: 'Database not initialized' });
+    }
+
+    // 1. Fetch user profile and verify subscription_status
+    const { data: pData, error: pErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('telegram_id', userId.toString())
+      .maybeSingle();
+
+    if (!pData || pData.subscription_status !== 'premium') {
+      return res.status(403).json({ error: 'Premium required' });
+    }
+
+    const targetCalories = pData.target_calories || 2500;
+
+    // 2. Form prompt for Groq
+    const prompt = `Составь меню на день для набора веса. Параметры: калории ${targetCalories} ккал, цель: набор массы.
+Верни JSON массив из 4 приёмов пищи (завтрак, обед, ужин, перекус), каждый объект:
+{ id, name, calories, protein, fat, carbs, time, eaten: false }
+Только JSON, без пояснений.`;
+
+    // 3. Call Groq (model llama-3.3-70b-versatile, temperature 0.7)
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.7,
+      messages: [
+        { role: "system", content: "You are a professional nutrition expert. Return ONLY valid JSON array without markdown code blocks or explanations." },
+        { role: "user", content: prompt }
+      ]
+    });
+
+    const text = completion.choices[0].message.content.trim();
+    let cleanJson = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+    let mealsArray = [];
+    try {
+      const parsed = JSON.parse(cleanJson);
+      mealsArray = Array.isArray(parsed) ? parsed : (parsed.meals || parsed.items || []);
+    } catch (parseErr) {
+      console.error("Failed to parse Groq response JSON:", cleanJson);
+      throw new Error("Invalid JSON format returned from Groq");
+    }
+
+    // 4. Save in daily_plans (upsert by telegram_id + date)
+    const today = new Date().toDateString();
+    await supabase.from('daily_plans').upsert({
+      telegram_id: userId.toString(),
+      date: today,
+      meals: mealsArray,
+      updated_at: new Date().toISOString()
+    });
+
+    return res.json({ meals: mealsArray });
+  } catch (error) {
+    console.error('Regenerate meals error:', error.message, error.stack);
+    logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', error?.message || String(error), error?.stack || '', 'Auto-captured backend error');
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // API to save general schedule settings and check weight logs
 app.post('/api/meals', requireAuth, async (req, res) => {
   console.log("POST /api/meals userId:", req.body?.userId);
