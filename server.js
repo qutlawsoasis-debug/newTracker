@@ -2352,10 +2352,11 @@ const notifyUpdate = async () => {
   }
 };
 
-// Delay startup notification by 3 seconds to let bot start up fully
-if (!process.env.DISABLE_BOT) {
-  setTimeout(notifyUpdate, 3000);
-}
+// Update notifications disabled - Vercel serverless 
+// triggers this on every cold start
+// if (!process.env.DISABLE_BOT) {
+//   setTimeout(notifyUpdate, 3000);
+// }
 
 // ─── Proactive Notification Scheduler ───
 
