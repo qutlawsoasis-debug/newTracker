@@ -518,6 +518,149 @@ app.post('/api/weight-history', requireAuth, async (req, res) => {
   return res.json({ success: true, entry: { date: dateStr, weight: numWeight } });
 });
 
+// ─── Referral System Endpoints ───
+
+// Endpoint POST /api/referral/register
+app.post('/api/referral/register', requireAuth, async (req, res) => {
+  const userId = req.user.id;
+  const { referrerId } = req.body;
+
+  if (!referrerId || referrerId === userId.toString()) {
+    return res.status(400).json({ error: "Cannot refer yourself or missing referrerId" });
+  }
+
+  if (supabase) {
+    try {
+      // Check if invitee is already registered
+      const { data: existingRef } = await supabase
+        .from('referrals')
+        .select('id')
+        .eq('invitee_id', userId.toString())
+        .maybeSingle();
+
+      if (existingRef) {
+        return res.json({ success: false, message: "User already registered under a referrer" });
+      }
+
+      // Insert referral record
+      await supabase.from('referrals').insert({
+        referrer_id: referrerId.toString(),
+        invitee_id: userId.toString(),
+        converted: false
+      });
+
+      // Award +50 points to referrer
+      const { data: currentPtsData } = await supabase
+        .from('user_points')
+        .select('points')
+        .eq('telegram_id', referrerId.toString())
+        .maybeSingle();
+
+      const currentPts = currentPtsData?.points || 0;
+      await supabase.from('user_points').upsert({
+        telegram_id: referrerId.toString(),
+        points: currentPts + 50,
+        updated_at: new Date().toISOString()
+      });
+
+      return res.json({ success: true, bonusDays: 0 });
+    } catch (err) {
+      logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
+      console.error("Referral registration failed:", err);
+      return res.status(500).json({ error: "Failed to register referral" });
+    }
+  }
+
+  return res.json({ success: true, bonusDays: 0 });
+});
+
+// Endpoint POST /api/referral/redeem
+app.post('/api/referral/redeem', requireAuth, async (req, res) => {
+  const userId = req.user.id;
+
+  if (!supabase) {
+    return res.status(400).json({ error: "Database unavailable" });
+  }
+
+  try {
+    const { data: ptsRecord } = await supabase
+      .from('user_points')
+      .select('points')
+      .eq('telegram_id', userId.toString())
+      .maybeSingle();
+
+    const currentPts = ptsRecord?.points || 0;
+    if (currentPts < 500) {
+      return res.status(400).json({ error: "Недостаточно баллов (требуется 500 баллов)" });
+    }
+
+    // Deduct 500 points
+    await supabase.from('user_points').upsert({
+      telegram_id: userId.toString(),
+      points: currentPts - 500,
+      updated_at: new Date().toISOString()
+    });
+
+    // Extend Premium by 30 days
+    const now = new Date();
+    const newExpiryDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const newExpiry = newExpiryDate.toISOString();
+
+    await supabase.from('profiles').update({
+      subscription_status: 'premium',
+      subscription_expires_at: newExpiry
+    }).eq('telegram_id', userId.toString());
+
+    return res.json({ success: true, newExpiry });
+  } catch (err) {
+    logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
+    console.error("Redeem failed:", err);
+    return res.status(500).json({ error: "Failed to redeem points" });
+  }
+});
+
+// Endpoint GET /api/referral/stats
+app.get('/api/referral/stats', requireAuth, async (req, res) => {
+  const userId = req.query.userId || req.user.id;
+  const referralLink = `https://t.me/TrackerCPFC_bot/app?startapp=ref_${userId}`;
+
+  let points = 0;
+  let totalInvited = 0;
+  let totalConverted = 0;
+
+  if (supabase) {
+    try {
+      const { data: ptsData } = await supabase
+        .from('user_points')
+        .select('points')
+        .eq('telegram_id', userId.toString())
+        .maybeSingle();
+      if (ptsData) points = ptsData.points || 0;
+
+      const { data: refsData } = await supabase
+        .from('referrals')
+        .select('converted')
+        .eq('referrer_id', userId.toString());
+
+      if (refsData) {
+        totalInvited = refsData.length;
+        totalConverted = refsData.filter(r => r.converted).length;
+      }
+    } catch (err) {
+      logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
+      console.error("Failed to query referral stats:", err);
+    }
+  }
+
+  return res.json({
+    points,
+    referral_link: referralLink,
+    total_invited: totalInvited,
+    total_converted: totalConverted,
+    next_reward_at: 500
+  });
+});
+
 const ensureUserGeolocation = async (userId, profileData, req) => {
   if (!supabase || !profileData || !userId) return profileData;
 
