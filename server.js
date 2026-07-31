@@ -81,6 +81,9 @@ if (!token) {
   process.exit(1);
 }
 
+// Initialize Telegram Bot
+const bot = new Bot(token);
+
 // Initialize Groq AI (llama-3.3-70b-versatile)
 const groqApiKey = process.env.GROQ_API_KEY;
 if (!groqApiKey) {
@@ -1885,8 +1888,6 @@ app.listen(PORT, () => {
 });
 
 // Telegram Bot Setup
-const bot = new Bot(token);
-
 bot.use(async (ctx, next) => {
   const fromId = ctx.from?.id;
   if (!fromId) return;
