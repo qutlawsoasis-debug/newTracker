@@ -525,8 +525,11 @@ function App() {
                   const pRes = await fetch(`/api/profile/${userId}`);
                   if (pRes.ok) {
                     const pData = await pRes.json();
+                    console.log('fetchProfile after payment:', JSON.stringify(pData).slice(0, 200));
                     if (pData.profile) {
                       setProfile(pData.profile);
+                    } else if (pData.subscription_status || pData.subscriptionStatus) {
+                      setProfile(pData);
                     }
                   }
                 } catch (e) {}

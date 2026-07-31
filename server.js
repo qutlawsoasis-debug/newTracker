@@ -1058,13 +1058,17 @@ app.get('/api/profile/:userId', requireAuth, async (req, res) => {
           region_name: pData.region_name || null,
           city: pData.city || null
         };
-        return res.json({ profile });
+        const responseData = { profile };
+        console.log('GET /api/profile response:', JSON.stringify(responseData).slice(0, 200));
+        return res.json(responseData);
       }
     } catch (err) {
       console.error("Failed to fetch profile:", err);
     }
   }
-  return res.json({ profile: null });
+  const fallbackRes = { profile: null };
+  console.log('GET /api/profile response:', JSON.stringify(fallbackRes).slice(0, 200));
+  return res.json(fallbackRes);
 });
 
 // API to trigger Telegram location request message in chat
