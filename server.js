@@ -707,22 +707,6 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
       if (invData) {
         invitedBy = invData.referrer_id;
       }
-
-      if (req.query.dump === 'true') {
-        const { data: allRefs } = await supabase.from('referrals').select('*');
-        const { data: allPts } = await supabase.from('user_points').select('*');
-        return res.json({
-          points,
-          referral_link: referralLink,
-          total_invited: totalInvited,
-          total_converted: totalConverted,
-          next_reward_at: 500,
-          invited_users: invitedUsers,
-          invited_by: invitedBy,
-          all_referrals: allRefs || [],
-          all_user_points: allPts || []
-        });
-      }
     } catch (err) {
       logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
       console.error("Failed to query referral stats:", err);
