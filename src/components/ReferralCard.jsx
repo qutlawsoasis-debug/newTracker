@@ -7,7 +7,7 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeem
   const [stats, setStats] = useState(null);
 
   const isRu = lang === "ru";
-  const refLink = `https://t.me/TrackerCPFC_bot/app?startapp=ref_${userId}`;
+  const refLink = `https://t.me/TrackerCPFC_bot?start=ref_${userId}`;
 
   React.useEffect(() => {
     if (!userId) return;
@@ -33,7 +33,7 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeem
 
   const handleShare = () => {
     const refParam = `ref_${userId}`;
-    const appLink = `https://t.me/TrackerCPFC_bot/app?startapp=${refParam}`;
+    const appLink = `https://t.me/TrackerCPFC_bot?start=${refParam}`;
     const shareText = encodeURIComponent('Набирай массу вместе со мной в GainTracker! 💪');
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(appLink)}&text=${shareText}`;
     if (window.Telegram?.WebApp?.openTelegramLink) {

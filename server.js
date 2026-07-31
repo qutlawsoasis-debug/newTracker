@@ -657,7 +657,7 @@ app.post('/api/referral/redeem', requireAuth, async (req, res) => {
 // Endpoint GET /api/referral/stats
 app.get('/api/referral/stats', requireAuth, async (req, res) => {
   const userId = req.query.userId || req.user.id;
-  const referralLink = `https://t.me/TrackerCPFC_bot/app?startapp=ref_${userId}`;
+  const referralLink = `https://t.me/TrackerCPFC_bot?start=ref_${userId}`;
 
   let points = 0;
   let totalInvited = 0;
@@ -1555,7 +1555,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
         if (ptsData) userPointsVal = ptsData.points || 0;
       } catch (e) {}
     }
-    const refLinkStr = `https://t.me/TrackerCPFC_bot/app?startapp=ref_${userId}`;
+    const refLinkStr = `https://t.me/TrackerCPFC_bot?start=ref_${userId}`;
 
     return res.json({ 
       targetCalories,
@@ -1833,7 +1833,7 @@ bot.command('start', async (ctx) => {
 
 bot.command('ref', async (ctx) => {
   const userId = ctx.from.id;
-  const link = `https://t.me/TrackerCPFC_bot/app?startapp=ref_${userId}`;
+  const link = `https://t.me/TrackerCPFC_bot?start=ref_${userId}`;
   await ctx.reply(
     `🎯 Твоя реферальная ссылка:\n${link}\n\n` +
     `За каждого друга который прошёл регистрацию: +50 баллов\n` +
