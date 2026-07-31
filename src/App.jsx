@@ -218,8 +218,8 @@ export default function AppWrapper() {
 }
 
 function App() {
-  console.log("start_param:", window.Telegram?.WebApp?.initDataUnsafe?.start_param);
-  console.log("search params:", window.location.search);
+  const tgStartParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param || '';
+  console.log("TG start_param:", tgStartParam);
 
   const searchParams = new URLSearchParams(window.location.search);
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -529,6 +529,12 @@ function App() {
   }, []);
 
   const [isNewUser, setIsNewUser] = useState(false);
+  const [referrerId, setReferrerId] = useState(() => {
+    if (tgStartParam.startsWith("ref_")) {
+      return tgStartParam.replace("ref_", "");
+    }
+    return null;
+  });
 
   const [onboardingForm, setOnboardingForm] = useState({
     gender: "M",
@@ -662,20 +668,16 @@ function App() {
         }
       }
 
-      // Check and register referral if startapp contains ref_
-      const startapp = new URLSearchParams(window.location.search).get("startapp") || window.Telegram?.WebApp?.initDataUnsafe?.start_param;
-      if (startapp && startapp.startsWith("ref_")) {
-        const referrerId = startapp.replace("ref_", "");
-        if (referrerId && referrerId !== userId.toString()) {
-          try {
-            await fetch("/api/referral/register", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ userId, referrerId })
-            });
-          } catch (rErr) {
-            console.error("Referral registration error:", rErr);
-          }
+      // Check and register referral if referrerId is set from tgStartParam
+      if (referrerId && referrerId !== userId.toString()) {
+        try {
+          await fetch("/api/referral/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, referrerId })
+          });
+        } catch (rErr) {
+          console.error("Referral registration error:", rErr);
         }
       }
 
