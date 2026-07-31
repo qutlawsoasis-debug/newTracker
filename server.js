@@ -1890,24 +1890,21 @@ app.post('/api/telegram-webhook', async (req, res) => {
             await supabase.from('referrals').update({ converted: true }).eq('id', refRecord.id);
 
             try {
-              await bot.api.sendMessage(
-                refRecord.referrer_id,
-                "🎁 Ваш реферал купил Premium! +200 баллов на счету"
-              );
-            } catch (bErr) {
-              console.warn("Failed to notify referrer:", bErr.message);
+              const referrerId = refRecord.referrer_id;
+              console.log('Sending referral reward message to referrerId:', referrerId, typeof referrerId);
+              await bot.api.sendMessage(Number(referrerId), '🎁 Ваш реферал купил Premium! +200 баллов на счету');
+            } catch (msgErr) {
+              console.error('Referrer sendMessage error:', msgErr.message);
             }
           }
         }
 
         if (userId) {
           try {
-            await bot.api.sendMessage(
-              userId,
-              "✅ Premium активирован на 30 дней! Enjoy 🎉"
-            );
-          } catch (bErr) {
-            console.warn("Failed to notify buyer:", bErr.message);
+            console.log('Sending premium message to userId:', userId, typeof userId);
+            await bot.api.sendMessage(Number(userId), '✅ Premium активирован на 30 дней! Enjoy 🎉');
+          } catch (msgErr) {
+            console.error('sendMessage error:', msgErr.message);
           }
         }
       } catch (payErr) {
