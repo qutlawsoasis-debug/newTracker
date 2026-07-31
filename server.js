@@ -671,6 +671,7 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
   let points = 0;
   let totalInvited = 0;
   let totalConverted = 0;
+  let invitedUsers = [];
   let invitedBy = null;
 
   if (supabase) {
