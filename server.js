@@ -737,7 +737,7 @@ app.get('/api/referral/raw-tables', async (req, res) => {
   return res.json({ referrals: refData || [], user_points: ptsData || [] });
 });
 
-app.get('/api/debug-reset-referral-test', async (req, res) => {
+app.get('/api/referral/reset-test', async (req, res) => {
   if (!supabase) return res.json({ error: "No Supabase connection" });
   
   const { data: refData, error: refErr } = await supabase
