@@ -1461,6 +1461,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
     const { regenerate } = req.query;
     const userId = req.user.id;
     const today = new Date().toDateString();
+    const todayStr = today;
 
   let profile = null;
   let weightHistory = [];
