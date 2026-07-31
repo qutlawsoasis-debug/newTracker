@@ -1798,6 +1798,29 @@ app.post('/api/meals/regenerate', async (req, res) => {
   }
 });
 
+app.get('/api/debug-regenerate/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const { data: pData } = await supabase
+      .from('profiles')
+      .select('subscription_status, target_calories, goal')
+      .eq('telegram_id', String(userId))
+      .maybeSingle();
+    
+    const { data: planData } = await supabase
+      .from('daily_plans')
+      .select('meals, date')
+      .eq('telegram_id', String(userId))
+      .order('date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    res.json({ profile: pData, lastPlan: planData });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // API to save general schedule settings and check weight logs
 app.post('/api/meals', requireAuth, async (req, res) => {
   console.log("POST /api/meals userId:", req.body?.userId);
