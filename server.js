@@ -1798,8 +1798,8 @@ app.post('/api/meals/regenerate', async (req, res) => {
   }
 });
 
-app.get(['/api/debug-regenerate', '/api/debug-regenerate/:userId'], async (req, res) => {
-  const userId = req.params.userId || req.query.userId;
+app.get('/api/debug-regenerate', async (req, res) => {
+  const userId = req.query.userId;
   if (!userId) return res.status(400).json({ error: 'userId parameter is required' });
   try {
     const { data: pData } = await supabase
@@ -1816,9 +1816,32 @@ app.get(['/api/debug-regenerate', '/api/debug-regenerate/:userId'], async (req, 
       .limit(1)
       .maybeSingle();
     
-    res.json({ profile: pData, lastPlan: planData });
+    return res.json({ profile: pData, lastPlan: planData });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/debug-regenerate/:userId', async (req, res) => {
+  const userId = req.params.userId || req.query.userId;
+  try {
+    const { data: pData } = await supabase
+      .from('profiles')
+      .select('subscription_status, target_calories, goal')
+      .eq('telegram_id', String(userId))
+      .maybeSingle();
+    
+    const { data: planData } = await supabase
+      .from('daily_plans')
+      .select('meals, date')
+      .eq('telegram_id', String(userId))
+      .order('date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    return res.json({ profile: pData, lastPlan: planData });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 });
 
