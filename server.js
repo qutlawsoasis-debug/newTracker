@@ -930,21 +930,14 @@ app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
 
     console.log("Creating invoice link for userId:", userId);
 
-    const createInvoiceFn = bot.api.createInvoiceLink 
-      ? bot.api.createInvoiceLink.bind(bot.api)
-      : (bot.api.raw?.createInvoiceLink ? bot.api.raw.createInvoiceLink.bind(bot.api.raw) : null);
-
-    if (!createInvoiceFn) {
-      throw new Error("createInvoiceLink method is not available on bot.api");
-    }
-
-    const invoiceLink = await createInvoiceFn({
-      title: "GainTracker Premium",
-      description: "30 дней Premium: AI чат без ограничений, замена блюд, обновление меню через AI",
-      payload: JSON.stringify({ userId: userId.toString(), type: "premium_30d" }),
-      currency: "XTR",
-      prices: [{ label: "Premium 30 дней", amount: 150 }]
-    });
+    const invoiceLink = await bot.api.createInvoiceLink(
+      "GainTracker Premium",
+      "30 дней Premium: AI чат без ограничений, замена блюд, обновление меню через AI",
+      JSON.stringify({ userId: userId.toString(), type: "premium_30d" }),
+      "", // provider_token must be empty string for Telegram Stars XTR
+      "XTR",
+      [{ label: "Premium 30 дней", amount: 150 }]
+    );
 
     console.log("Invoice link created successfully:", invoiceLink);
     return res.json({ invoiceLink });
