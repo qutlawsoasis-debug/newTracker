@@ -556,12 +556,27 @@ app.post('/api/referral/register', requireAuth, async (req, res) => {
         .eq('telegram_id', referrerId.toString())
         .maybeSingle();
 
-      const currentPts = currentPtsData?.points || 0;
-      await supabase.from('user_points').upsert({
-        telegram_id: referrerId.toString(),
-        points: currentPts + 50,
-        updated_at: new Date().toISOString()
-      });
+      const newPoints = currentPts + 50;
+
+      // Telegram notification to Referrer
+      try {
+        await bot.api.sendMessage(
+          referrerId.toString(),
+          `🎉 По твоей реферальной ссылке зарегистрировался новый пользователь!\n+50 баллов начислено на твой счёт.\nТекущий баланс: ${newPoints} баллов`
+        );
+      } catch (botErr) {
+        console.warn("Failed to notify referrer via Telegram bot:", botErr.message);
+      }
+
+      // Telegram notification to Invitee
+      try {
+        await bot.api.sendMessage(
+          userId.toString(),
+          `✅ Ты зарегистрировался по реферальной ссылке друга!\nКогда купишь Premium — твой друг получит +200 баллов.`
+        );
+      } catch (botErr) {
+        console.warn("Failed to notify invitee via Telegram bot:", botErr.message);
+      }
 
       return res.json({ success: true, bonusDays: 0 });
     } catch (err) {
@@ -627,6 +642,7 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
   let points = 0;
   let totalInvited = 0;
   let totalConverted = 0;
+  let invitedUsers = [];
 
   if (supabase) {
     try {
@@ -639,12 +655,18 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
 
       const { data: refsData } = await supabase
         .from('referrals')
-        .select('converted')
-        .eq('referrer_id', userId.toString());
+        .select('invitee_id, created_at, converted')
+        .eq('referrer_id', userId.toString())
+        .order('created_at', { ascending: false });
 
       if (refsData) {
         totalInvited = refsData.length;
         totalConverted = refsData.filter(r => r.converted).length;
+        invitedUsers = refsData.map(r => ({
+          invitee_id: r.invitee_id,
+          created_at: r.created_at,
+          converted: r.converted
+        }));
       }
     } catch (err) {
       logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
@@ -657,7 +679,8 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
     referral_link: referralLink,
     total_invited: totalInvited,
     total_converted: totalConverted,
-    next_reward_at: 500
+    next_reward_at: 500,
+    invited_users: invitedUsers
   });
 });
 

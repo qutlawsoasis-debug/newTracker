@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Gift, Copy, Check, Users, Sparkles } from "lucide-react";
+import { Gift, Copy, Check, Users, Sparkles, Share2 } from "lucide-react";
 
 export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeemSuccess }) {
   const [copied, setCopied] = useState(false);
@@ -22,12 +22,22 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeem
   const currentPoints = stats?.points !== undefined ? stats.points : points;
   const totalInvited = stats?.total_invited || 0;
   const totalConverted = stats?.total_converted || 0;
+  const invitedUsers = stats?.invited_users || [];
   const progressPercent = Math.min(100, Math.round((currentPoints / 500) * 100));
 
   const handleCopy = () => {
     navigator.clipboard.writeText(refLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = () => {
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent('Попробуй GainTracker — трекер питания для набора веса! Первый шаг к цели 💪')}`;
+    if (window.Telegram?.WebApp?.openTelegramLink) {
+      window.Telegram.WebApp.openTelegramLink(shareUrl);
+    } else {
+      window.open(shareUrl, "_blank");
+    }
   };
 
   const handleRedeem = async () => {
@@ -112,24 +122,24 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeem
         </div>
       </div>
 
-      {/* Referral Link & Copy */}
-      <div className="space-y-1.5">
+      {/* Referral Link & Actions */}
+      <div className="space-y-2">
         <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-          {isRu ? "Твоя уникальная ссылка" : "Dein Empfehlungslink"}
+          {isRu ? "Твоя реферальная ссылка" : "Dein Empfehlungslink"}
         </label>
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            readOnly
-            value={refLink}
-            className="flex-1 bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs font-medium text-zinc-700 truncate focus:outline-none"
-          />
+        <input
+          type="text"
+          readOnly
+          value={refLink}
+          className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs font-medium text-zinc-700 truncate focus:outline-none"
+        />
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={handleCopy}
-            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 active:scale-95 ${
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 active:scale-95 border ${
               copied
-                ? "bg-emerald-600 text-white"
-                : "bg-zinc-950 text-white hover:bg-zinc-800"
+                ? "bg-emerald-600 text-white border-emerald-600"
+                : "bg-white text-zinc-900 border-zinc-200 hover:border-zinc-300"
             }`}
           >
             {copied ? (
@@ -144,7 +154,63 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeem
               </>
             )}
           </button>
+
+          <button
+            onClick={handleShare}
+            className="py-2 px-3 bg-zinc-950 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 active:scale-95 shadow-sm"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>{isRu ? "Поделиться" : "Teilen"}</span>
+          </button>
         </div>
+      </div>
+
+      {/* Invited Users List */}
+      <div className="space-y-2 pt-1 border-t border-zinc-100">
+        <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+          {isRu ? "Приглашённые" : "Eingeladene Kontakte"}
+        </label>
+
+        {invitedUsers.length === 0 ? (
+          <p className="text-xs text-zinc-400 italic text-center py-2">
+            {isRu ? "Ты ещё никого не пригласил" : "Du hast noch niemanden eingeladen"}
+          </p>
+        ) : (
+          <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+            {invitedUsers.map((item, idx) => (
+              <div
+                key={item.invitee_id || idx}
+                className="flex items-center justify-between p-2.5 bg-zinc-50 border border-zinc-100 rounded-xl text-xs"
+              >
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 rounded-full bg-zinc-200 text-zinc-700 flex items-center justify-center font-bold text-[10px]">
+                    ID
+                  </div>
+                  <div>
+                    <span className="block font-semibold text-zinc-900">
+                      ID: {item.invitee_id}
+                    </span>
+                    <span className="text-[10px] text-zinc-400">
+                      {item.created_at ? new Date(item.created_at).toLocaleDateString(isRu ? "ru-RU" : "de-DE") : ""}
+                    </span>
+                  </div>
+                </div>
+
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    item.converted
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                      : "bg-zinc-200/60 text-zinc-600"
+                  }`}
+                >
+                  {item.converted
+                    ? (isRu ? "✅ Купил Premium" : "✅ Premium gekauft")
+                    : (isRu ? "⏳ Зарегистрировался" : "⏳ Registriert")}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Redeem Button */}
@@ -160,7 +226,7 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeem
         <span>
           {isRedeeming
             ? (isRu ? "Активация..." : "Aktiviere...")
-            : (isRu ? "Получить 1 месяц Premiumбесплатно (500 баллов)" : "1 Monat Premium einlösen (500 Pkt)")}
+            : (isRu ? "Получить 1 месяц Premium бесплатно (500 баллов)" : "1 Monat Premium einlösen (500 Pkt)")}
         </span>
       </button>
 

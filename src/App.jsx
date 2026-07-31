@@ -218,6 +218,9 @@ export default function AppWrapper() {
 }
 
 function App() {
+  console.log("start_param:", window.Telegram?.WebApp?.initDataUnsafe?.start_param);
+  console.log("search params:", window.location.search);
+
   const searchParams = new URLSearchParams(window.location.search);
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
   const userId = tgUser?.id || searchParams.get("tgUserId") || "12345";
