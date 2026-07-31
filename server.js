@@ -1724,7 +1724,7 @@ app.post('/api/meals/regenerate', async (req, res) => {
     console.log('regenerate: step 1 - fetching profile');
     const profilePromise = supabase
       .from('profiles')
-      .select('subscription_status, target_calories, goal, gender, age, weight, height, activity')
+      .select('subscription_status, target_calories, goal')
       .eq('telegram_id', String(userId))
       .maybeSingle();
 
@@ -1786,8 +1786,7 @@ app.post('/api/meals/regenerate', async (req, res) => {
     await supabase.from('daily_plans').upsert({
       telegram_id: userId.toString(),
       date: today,
-      meals: mealsArray,
-      updated_at: new Date().toISOString()
+      meals: mealsArray
     });
 
     return res.json({ meals: mealsArray });
@@ -1954,8 +1953,7 @@ app.post('/api/telegram-webhook', async (req, res) => {
         if (supabase && userId) {
           const { error: updateError } = await supabase.from('profiles').update({
             subscription_status: 'premium',
-            subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            updated_at: new Date().toISOString()
+            subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
           }).eq('telegram_id', userId);
 
           console.log('UPDATE error:', updateError);
@@ -2111,8 +2109,7 @@ bot.on('message:location', async (ctx) => {
           .update({
             country,
             region_name: regionName,
-            city,
-            updated_at: new Date().toISOString()
+            city
           })
           .eq('telegram_id', userId.toString());
           
