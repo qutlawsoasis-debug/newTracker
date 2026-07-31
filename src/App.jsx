@@ -520,20 +520,7 @@ function App() {
             if (status === 'paid') {
               console.log("Payment successful!");
               await new Promise(resolve => setTimeout(resolve, 5000));
-              if (userId) {
-                try {
-                  const pRes = await fetch(`/api/profile/${userId}`);
-                  if (pRes.ok) {
-                    const pData = await pRes.json();
-                    console.log('fetchProfile after payment:', JSON.stringify(pData).slice(0, 200));
-                    if (pData.profile) {
-                      setProfile(pData.profile);
-                    } else if (pData.subscription_status || pData.subscriptionStatus) {
-                      setProfile(pData);
-                    }
-                  }
-                } catch (e) {}
-              }
+              await fetchState();
               alert('✅ Premium активирован!');
             }
           });
@@ -639,73 +626,72 @@ function App() {
   });
 
   // Load state from VDS API on mount
-  useEffect(() => {
-    const fetchState = async () => {
-      try {
-        const res = await fetch(`/api/meals?userId=${userId}`);
-        if (!res.ok) throw new Error("HTTP error " + res.status);
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Server error: " + res.status);
-        }
-        const data = await res.json();
-        
-        if (data.isNewUser || !data.profile) {
-          setIsNewUser(true);
-        } else {
-          setIsNewUser(false);
-        }
+  const fetchState = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/meals?userId=${userId}`);
+      if (!res.ok) throw new Error("HTTP error " + res.status);
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server error: " + res.status);
+      }
+      const data = await res.json();
+      
+      if (data.isNewUser || !data.profile) {
+        setIsNewUser(true);
+      } else {
+        setIsNewUser(false);
+      }
 
-        if (data.profile) {
-          setProfile(data.profile);
-        }
-        if (data.meals) {
-          setMeals(data.meals);
-        }
-        if (data.schedule && Object.keys(data.schedule).length > 0) {
-          setSchedule(prev => ({ ...prev, ...data.schedule }));
-        }
-        if (data.eatenMeals) {
-          setEatenMeals(data.eatenMeals);
-        }
-        if (data.weightHistory && data.weightHistory.length > 0) {
-          setWeightHistory(data.weightHistory);
-        } else if (data.profile && data.profile.weight) {
-          setWeightHistory(getInitialHistory(data.profile.weight));
-        }
-        if (data.globalAnalytics) {
-          setGlobalAnalytics(data.globalAnalytics);
-        }
-        if (data.todayScannedCalories !== undefined) {
-          setTodayScannedCalories(data.todayScannedCalories);
-        }
-        if (data.points !== undefined) {
-          setPoints(data.points);
-        }
-        
-        // Fetch AI changelog on mount
-        try {
-          const changelogRes = await fetch(`/api/changelog?version=${DATA_VERSION}&userId=${userId}`);
-          if (changelogRes.ok) {
-            const changelogContentType = changelogRes.headers.get("content-type");
-            if (!changelogContentType || !changelogContentType.includes("application/json")) {
-              throw new Error("Server error: " + changelogRes.status);
-            }
+      if (data.profile) {
+        setProfile(data.profile);
+      }
+      if (data.meals) {
+        setMeals(data.meals);
+      }
+      if (data.schedule && Object.keys(data.schedule).length > 0) {
+        setSchedule(prev => ({ ...prev, ...data.schedule }));
+      }
+      if (data.eatenMeals) {
+        setEatenMeals(data.eatenMeals);
+      }
+      if (data.weightHistory && data.weightHistory.length > 0) {
+        setWeightHistory(data.weightHistory);
+      } else if (data.profile && data.profile.weight) {
+        setWeightHistory(getInitialHistory(data.profile.weight));
+      }
+      if (data.globalAnalytics) {
+        setGlobalAnalytics(data.globalAnalytics);
+      }
+      if (data.todayScannedCalories !== undefined) {
+        setTodayScannedCalories(data.todayScannedCalories);
+      }
+      if (data.points !== undefined) {
+        setPoints(data.points);
+      }
+      
+      // Fetch AI changelog on mount
+      try {
+        const changelogRes = await fetch(`/api/changelog?version=${DATA_VERSION}&userId=${userId}`);
+        if (changelogRes.ok) {
+          const changelogContentType = changelogRes.headers.get("content-type");
+          if (changelogContentType && changelogContentType.includes("application/json")) {
             const changelogData = await changelogRes.json();
             setChangelog(changelogData);
           }
-        } catch (err) {
-          console.error("Failed to fetch changelog", err);
         }
       } catch (err) {
-        console.error("Failed to fetch state from API:", err);
-      } finally {
-        setIsLoaded(true);
+        console.error("Failed to fetch changelog", err);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch state from API:", err);
+    } finally {
+      setIsLoaded(true);
+    }
+  }, [userId, getInitialHistory]);
 
+  useEffect(() => {
     fetchState();
-  }, [userId, tgUser]);
+  }, [fetchState]);
 
   const handleOnboardingComplete = useCallback(async (onboardingData) => {
     console.log("handleOnboardingComplete called:", { userId, referrerId });
