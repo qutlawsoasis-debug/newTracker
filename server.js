@@ -1739,7 +1739,10 @@ app.post('/api/meals/regenerate', async (req, res) => {
 
     console.log('regenerate: step 3 - groq client exists?', !!groq);
 
-    const targetCalories = pData.target_calories || 2500;
+    const targetCalories = pData.target_calories || 2000;
+    const weight = pData.weight || 70;
+    const goal = pData.goal || 'gain';
+    console.log('regenerate: step 3 - calling groq, targetCalories:', targetCalories, 'weight:', weight);
 
     // 2. Form prompt for Groq
     const prompt = `Составь меню на день для набора веса. Параметры: калории ${targetCalories} ккал, цель: набор массы.
