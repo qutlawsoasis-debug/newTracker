@@ -567,10 +567,13 @@ app.post('/api/referral/register', requireAuth, async (req, res) => {
         return res.json({ success: false, message: "User already registered under a referrer" });
       }
 
+      const username = req.body?.username || req.body?.invited_username || req.user?.username || null;
+
       // Insert referral record
       await supabase.from('referrals').insert({
         referrer_id: referrerId.toString(),
         invitee_id: userId.toString(),
+        invited_username: username,
         converted: false
       });
 
@@ -592,9 +595,10 @@ app.post('/api/referral/register', requireAuth, async (req, res) => {
 
       // Telegram notification to Referrer
       try {
+        const userTag = username ? `@${username.replace(/^@/, '')}` : 'новый пользователь';
         await bot.api.sendMessage(
-          referrerId.toString(),
-          `🎉 По твоей реферальной ссылке зарегистрировался новый пользователь!\n+50 баллов начислено на твой счёт.\nТекущий баланс: ${newPoints} баллов`
+          Number(referrerId),
+          `🎉 По твоей реферальной ссылке зарегистрировался ${userTag}! +50 баллов`
         );
       } catch (botErr) {
         console.warn("Failed to notify referrer via Telegram bot:", botErr.message);
@@ -688,7 +692,7 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
 
       const { data: refsData } = await supabase
         .from('referrals')
-        .select('invitee_id, created_at, converted')
+        .select('invitee_id, invited_username, created_at, converted')
         .eq('referrer_id', userId.toString())
         .order('created_at', { ascending: false });
 
@@ -697,6 +701,7 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
         totalConverted = refsData.filter(r => r.converted).length;
         invitedUsers = refsData.map(r => ({
           invitee_id: r.invitee_id,
+          invited_username: r.invited_username || null,
           created_at: r.created_at,
           converted: r.converted
         }));
@@ -1869,7 +1874,7 @@ app.post('/api/telegram-webhook', async (req, res) => {
           // Check if user was referred (+200 points to referrer)
           const { data: refRecord } = await supabase
             .from('referrals')
-            .select('id, referrer_id, converted')
+            .select('id, referrer_id, invitee_id, invited_username, converted')
             .eq('invitee_id', userId)
             .maybeSingle();
 
@@ -1891,8 +1896,12 @@ app.post('/api/telegram-webhook', async (req, res) => {
 
             try {
               const referrerId = refRecord.referrer_id;
+              const refUser = refRecord.invited_username ? `@${refRecord.invited_username.replace(/^@/, '')}` : 'Твой реферал';
               console.log('Sending referral reward message to referrerId:', referrerId, typeof referrerId);
-              await bot.api.sendMessage(Number(referrerId), '🎁 Ваш реферал купил Premium! +200 баллов на счету');
+              await bot.api.sendMessage(
+                Number(referrerId),
+                `⭐ ${refUser} купил Premium! +200 баллов на счету`
+              );
             } catch (msgErr) {
               console.error('Referrer sendMessage error:', msgErr.message);
             }

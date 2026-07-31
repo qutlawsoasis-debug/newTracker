@@ -196,7 +196,7 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, referral
           <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
             {invitedUsers.map((item, idx) => (
               <div
-                key={item.invitee_id || idx}
+                key={idx}
                 className="flex items-center justify-between p-2.5 bg-zinc-50 border border-zinc-100 rounded-xl text-xs"
               >
                 <div className="flex items-center space-x-2">
@@ -204,9 +204,21 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, referral
                     ID
                   </div>
                   <div>
-                    <span className="block font-semibold text-zinc-900">
-                      ID: {item.invitee_id}
-                    </span>
+                    {item.invited_username || item.username ? (
+                      <a
+                        href={`https://t.me/${(item.invited_username || item.username).replace(/^@/, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-bold text-indigo-600 hover:text-indigo-800 hover:underline block text-xs"
+                      >
+                        @{(item.invited_username || item.username).replace(/^@/, '')}
+                      </a>
+                    ) : (
+                      <span className="block font-semibold text-zinc-900">
+                        ID: {item.invitee_id}
+                      </span>
+                    )}
                     <span className="text-[10px] text-zinc-400">
                       {item.created_at ? new Date(item.created_at).toLocaleDateString(isRu ? "ru-RU" : "de-DE") : ""}
                     </span>
@@ -214,15 +226,15 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, referral
                 </div>
 
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
                     item.converted
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                      : "bg-zinc-200/60 text-zinc-600"
+                      ? "bg-amber-50 text-amber-700 border border-amber-200/60 font-black shadow-xs"
+                      : "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
                   }`}
                 >
                   {item.converted
-                    ? (isRu ? "✅ Купил Premium" : "✅ Premium gekauft")
-                    : (isRu ? "⏳ Зарегистрировался" : "⏳ Registriert")}
+                    ? "⭐ Premium"
+                    : (isRu ? "✓ Зарегистрирован" : "✓ Registriert")}
                 </span>
               </div>
             ))}

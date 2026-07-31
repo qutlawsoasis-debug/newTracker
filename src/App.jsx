@@ -519,13 +519,15 @@ function App() {
           window.Telegram.WebApp.openInvoice(data.invoiceLink, async (status) => {
             if (status === 'paid') {
               console.log("Payment successful!");
-              await new Promise(resolve => setTimeout(resolve, 3000));
+              await new Promise(resolve => setTimeout(resolve, 5000));
               if (userId) {
                 try {
                   const pRes = await fetch(`/api/profile/${userId}`);
                   if (pRes.ok) {
                     const pData = await pRes.json();
-                    if (pData.profile) setProfile(pData.profile);
+                    if (pData.profile) {
+                      setProfile(pData.profile);
+                    }
                   }
                 } catch (e) {}
               }
@@ -759,12 +761,13 @@ function App() {
 
       // Check and register referral if referrerId is set from tgStartParam
       if (referrerId && referrerId !== userId.toString()) {
-        console.log("Registering referral:", { userId, referrerId });
+        const tgUsername = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || null;
+        console.log("Registering referral:", { userId, referrerId, username: tgUsername });
         try {
           await fetch("/api/referral/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId, referrerId })
+            body: JSON.stringify({ userId, referrerId, username: tgUsername })
           });
         } catch (rErr) {
           console.error("Referral registration error:", rErr);
