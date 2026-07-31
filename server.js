@@ -1715,14 +1715,10 @@ app.get('/api/meals', requireAuth, async (req, res) => {
 
 // Endpoint POST /api/meals/regenerate (Premium menu regeneration via Groq)
 app.post('/api/meals/regenerate', async (req, res) => {
-  console.log('regenerate: RAW body type:', typeof req.body, 'body:', JSON.stringify(req.body));
   try {
     const userId = req.body?.userId || req.query?.userId;
-    console.log('regenerate: userId', userId);
-    
     if (!userId) return res.status(400).json({ error: 'userId required' });
 
-    console.log('regenerate: step 1 - fetching profile');
     const profilePromise = supabase
       .from('profiles')
       .select('subscription_status, target_calories, goal')
@@ -1733,24 +1729,17 @@ app.post('/api/meals/regenerate', async (req, res) => {
       setTimeout(() => reject(new Error('Supabase timeout')), 5000)
     );
 
-    const { data: pData, error: pErr } = await Promise.race([profilePromise, timeoutPromise]);
-    console.log('regenerate: step 2', JSON.stringify(pData)?.slice(0, 100), pErr?.message);
+    const { data: pData } = await Promise.race([profilePromise, timeoutPromise]);
 
     if (!pData) return res.status(404).json({ error: 'Profile not found' });
     if (pData.subscription_status !== 'premium') return res.status(403).json({ error: 'Premium required' });
 
-    console.log('regenerate: step 3 - groq client exists?', !!groq);
-
     const targetCalories = pData.target_calories || 2000;
-    const weight = pData.weight || 70;
-    const goal = pData.goal || 'gain';
-    console.log('regenerate: step 3 - calling groq, targetCalories:', targetCalories, 'weight:', weight);
 
     // 2. Form prompt for Groq
-    const prompt = `Составь меню на день для набора веса. Параметры: калории ${targetCalories} ккал, цель: набор массы.
-Верни JSON массив из 4 приёмов пищи (завтрак, обед, ужин, перекус), каждый объект:
-{ id, name, calories, protein, fat, carbs, time, eaten: false }
-Только JSON, без пояснений.`;
+    const prompt = `Составь меню на день для набора веса. Параметры: ${targetCalories} ккал в день, цель: набор массы.
+Верни ТОЛЬКО JSON массив из 4 объектов, без пояснений, без markdown:
+[{"id":1,"name":"Завтрак: овсянка с бананом","calories":520,"protein":15,"fat":12,"carbs":80,"time":"09:00"},{"id":2,"name":"Обед: куриная грудка с рисом","calories":650,"protein":45,"fat":15,"carbs":60,"time":"13:00"},{"id":3,"name":"Перекус: творог с мёдом","calories":300,"protein":20,"fat":5,"carbs":40,"time":"17:00"},{"id":4,"name":"Ужин: говядина с картофелем","calories":700,"protein":50,"fat":25,"carbs":55,"time":"20:00"}]`;
 
     // 3. Call Groq (model llama-3.3-70b-versatile, temperature 0.7)
     let completion;
@@ -1763,7 +1752,6 @@ app.post('/api/meals/regenerate', async (req, res) => {
           { role: 'user', content: prompt }
         ]
       });
-      console.log('regenerate: groq raw response', JSON.stringify(completion?.choices?.[0]?.message?.content).slice(0, 500));
     } catch (groqErr) {
       console.error('regenerate: GROQ ERROR', groqErr.message);
       return res.status(500).json({ error: 'Groq failed: ' + groqErr.message });
@@ -1821,8 +1809,6 @@ app.post('/api/meals/regenerate', async (req, res) => {
       });
     }
 
-    console.log('regenerate: returning meals format:', JSON.stringify(mealsFormatted).slice(0, 300));
-
     // 4. Save in daily_plans (upsert by telegram_id + date)
     const today = new Date().toDateString();
     await supabase.from('daily_plans').upsert({
@@ -1833,7 +1819,7 @@ app.post('/api/meals/regenerate', async (req, res) => {
 
     return res.json({ meals: mealsFormatted });
   } catch (e) {
-    console.error('regenerate: FATAL', e.message, e.stack?.slice(0, 300));
+    console.error('regenerate: FATAL', e.message);
     logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', e?.message || String(e), e?.stack || '', 'Auto-captured backend error');
     return res.status(500).json({ error: e.message });
   }

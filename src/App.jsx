@@ -1007,7 +1007,6 @@ function App() {
 
   // Full day AI-powered menu regeneration endpoint
   const handleRegenerateMenu = async () => {
-    console.log('handleRegenerateMenu called, isPremium:', isPremium, 'profile?.subscription_status:', profile?.subscription_status, 'profile?.subscriptionStatus:', profile?.subscriptionStatus);
     setIsRegenerating(true);
     try {
       const res = await fetch("/api/meals/regenerate", {
@@ -1016,9 +1015,6 @@ function App() {
         body: JSON.stringify({ userId })
       });
       const data = await res.json();
-      console.log('current meals state type:', typeof meals, Array.isArray(meals) ? 'array' : 'object');
-      console.log('received meals type:', typeof data.meals, Array.isArray(data.meals) ? 'array' : 'object');
-      console.log('regenerate full response:', JSON.stringify(data).slice(0, 500));
 
       if (data.meals && typeof data.meals === 'object' && Object.keys(data.meals).length > 0) {
         setMeals(data.meals);
