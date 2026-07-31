@@ -1810,9 +1810,9 @@ function App() {
                     </div>
                     <div className="flex justify-between items-center py-1.5">
                       <span className="text-[12px] font-medium text-zinc-500">
-                        {lang === "ru" ? "Утрачено" : "Verloren"}
+                        {lang === "ru" ? "Пропущено" : "Verpasst"}
                       </span>
-                      <span className="text-[12px] font-bold text-red-500 font-mono">
+                      <span className="text-[12px] font-medium text-zinc-400 font-mono">
                         {lang === "ru" ? `${displayMissedCalories} ккал` : `${displayMissedCalories} kcal`}
                       </span>
                     </div>

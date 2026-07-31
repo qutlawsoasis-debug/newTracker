@@ -53,14 +53,14 @@ export default function MealCard({ meal, section, label, time, onReroll, isEaten
     <div className="relative pl-9">
       {/* Timeline dot */}
       <div className={`absolute left-[11px] top-5 w-[9px] h-[9px] rounded-full bg-white border-2 z-10 ${
-        showAsMissed ? "border-red-400" : "border-zinc-300"
+        showAsMissed ? "border-zinc-400" : "border-zinc-300"
       }`} />
 
       {/* Card */}
       <div 
         onClick={() => setIsExpanded(!isExpanded)}
         className={`bg-white border rounded-xl shadow-sm overflow-hidden cursor-pointer select-none transition-all duration-200 ${
-          showAsMissed ? "opacity-50 border-red-200 bg-red-50/10" : "opacity-100 border-zinc-200/80"
+          showAsMissed ? "opacity-50 border-zinc-200 bg-zinc-50/50" : "opacity-100 border-zinc-200/80"
         }`}
       >
 
@@ -79,10 +79,10 @@ export default function MealCard({ meal, section, label, time, onReroll, isEaten
           
           <div className="flex items-center gap-3">
             {showAsMissed ? (
-              <span className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md whitespace-nowrap">
+              <span className="text-[10px] font-medium text-zinc-400 bg-zinc-100 border border-zinc-200 px-2 py-0.5 rounded-md whitespace-nowrap">
                 {lang === "ru" 
-                  ? `Пропущено (Утрачено ${meal.calories} ккал)` 
-                  : `Verpasst (Verloren ${meal.calories} kcal)`
+                  ? `Пропущено (${meal.calories} ккал)` 
+                  : `Verpasst (${meal.calories} kcal)`
                 }
               </span>
             ) : (

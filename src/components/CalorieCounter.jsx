@@ -109,11 +109,11 @@ export default function CalorieCounter({
       {/* Deficit / Surplus Indicator */}
       <div className="pt-3 border-t border-zinc-200/60">
         {showLost ? (
-          <div className="border-l-2 border-red-500 pl-3 py-0.5 bg-red-500/[0.02]">
-            <span className="text-[12px] font-bold text-red-500 block">
+          <div className="border-l-2 border-zinc-300 pl-3 py-0.5 bg-zinc-500/[0.02]">
+            <span className="text-[12px] font-medium text-zinc-400 block">
               {translations.dayProgress === "Прогресс за день"
-                ? `Упущено времени / Сгорело: ${lostCalories} ккал`
-                : `Zeit verpasst / Verloren: ${lostCalories} kcal`
+                ? `Пропущено: ${lostCalories} ккал`
+                : `Verpasst: ${lostCalories} kcal`
               }
             </span>
           </div>
