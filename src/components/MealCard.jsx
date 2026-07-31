@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MealIcon from "./MealIcon";
 
-export default function MealCard({ meal, section, label, time, onReroll, isEaten, onToggleEaten, lang, translations, onReplaceReady, isMissed }) {
+export default function MealCard({ meal, section, label, time, onReroll, isEaten, onToggleEaten, lang, translations, onReplaceReady, isMissed, isPremium = false, onUpgradeClick }) {
   const [checkedItems, setCheckedItems] = useState({});
   const [isExpanded, setIsExpanded] = useState(false);
   const [isRerolling, setIsRerolling] = useState(false);
@@ -217,14 +217,22 @@ export default function MealCard({ meal, section, label, time, onReroll, isEaten
                 </button>
 
                 <button
-                  onClick={(e) => { e.stopPropagation(); handleReplaceReady(); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isPremium && onUpgradeClick) {
+                      onUpgradeClick(lang === "ru" ? "⭐ Функция «Купить готовое» доступна только для пользователей Premium" : "⭐ Fertiggericht ist nur für Premium-Nutzer verfügbar");
+                      return;
+                    }
+                    handleReplaceReady();
+                  }}
                   disabled={isReplacingReady || isRerolling}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg
                     bg-zinc-50 border border-zinc-200/60
                     hover:bg-zinc-100 active:scale-[0.98]
                     transition-all duration-150
                     disabled:opacity-40 disabled:cursor-not-allowed"
                 >
+                  {!isPremium && <span className="text-xs">🔒</span>}
                   <span className="text-[12px] font-medium text-zinc-500">
                     {isReplacingReady 
                       ? (translations.readyToEatReplacing || (lang === "ru" ? "Замена..." : "Ersetze...")) 

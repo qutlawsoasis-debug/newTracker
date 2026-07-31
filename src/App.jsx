@@ -368,6 +368,13 @@ function App() {
   const [chatMessages, setChatMessages] = useState([]);
   const [todayScannedCalories, setTodayScannedCalories] = useState(0);
   const [points, setPoints] = useState(0);
+  const [upgradeModal, setUpgradeModal] = useState({ isOpen: false, message: "" });
+
+  const isPremium = profile?.subscriptionStatus === 'premium' || profile?.subscription_status === 'premium';
+
+  const openUpgradeModal = (msg) => {
+    setUpgradeModal({ isOpen: true, message: msg || "" });
+  };
 
   const handleFoodLogged = useCallback((foodData) => {
     if (foodData && foodData.calories) {
@@ -1505,10 +1512,17 @@ function App() {
 
             {/* Regenerate Daily Menu via AI button */}
             <button
-              onClick={handleRegenerateMenu}
+              onClick={() => {
+                if (!isPremium) {
+                  openUpgradeModal(lang === "ru" ? "⭐ Обновление меню через ИИ доступно только с Premium подпиской" : "⭐ KI-Menüaktualisierung ist nur mit Premium verfügbar");
+                  return;
+                }
+                handleRegenerateMenu();
+              }}
               disabled={isRegenerating}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200/60 hover:bg-zinc-100/80 active:scale-[0.98] transition-all text-xs font-semibold text-zinc-600 mb-4 shadow-sm"
             >
+              {!isPremium && <span className="text-xs">🔒</span>}
               <svg
                 className={`w-3.5 h-3.5 text-zinc-500 ${isRegenerating ? 'animate-spin' : ''}`}
                 fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"
@@ -1542,6 +1556,8 @@ function App() {
                         translations={translations[lang]}
                         onReplaceReady={handleReplaceReady}
                         isMissed={isTimePassed(mealTimes[sec.key])}
+                        isPremium={isPremium}
+                        onUpgradeClick={(msg) => openUpgradeModal(msg)}
                       />
                     ) : null
                   ))}
@@ -1779,7 +1795,7 @@ function App() {
           <>
             {/* Subscription Status Card */}
             {profile && (
-              profile.subscriptionStatus === "premium" ? (
+              isPremium ? (
                 <div className="bg-zinc-950 text-white rounded-xl border border-zinc-800 p-5 mb-5 shadow-sm">
                   <div className="flex justify-between items-center mb-3">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
@@ -1789,8 +1805,8 @@ function App() {
                   </div>
                   <p className="text-xs text-zinc-300 leading-relaxed font-semibold">
                     {lang === "ru" 
-                      ? `Премиум активен до: ${new Date(profile.subscriptionExpiresAt).toLocaleDateString("ru-RU")}`
-                      : `Premium aktiv bis: ${new Date(profile.subscriptionExpiresAt).toLocaleDateString("de-DE")}`}
+                      ? `✅ Premium активен до ${profile.subscriptionExpiresAt || profile.subscription_expires_at ? new Date(profile.subscriptionExpiresAt || profile.subscription_expires_at).toLocaleDateString("ru-RU") : ""}`
+                      : `✅ Premium aktiv bis ${profile.subscriptionExpiresAt || profile.subscription_expires_at ? new Date(profile.subscriptionExpiresAt || profile.subscription_expires_at).toLocaleDateString("de-DE") : ""}`}
                   </p>
                 </div>
               ) : (
@@ -1801,19 +1817,17 @@ function App() {
                     </span>
                     <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-zinc-200 text-zinc-600">Free</span>
                   </div>
-                  <p className="text-xs text-zinc-500 mb-4 leading-relaxed font-medium">
-                    {lang === "ru" 
-                      ? "Получите доступ к расширенному ИИ-анализу и готовым заменам." 
-                      : "Erhalten Sie Zugriff auf erweiterte KI-Analysen und Fertiggerichte."}
+                  <p className="text-xs text-zinc-700 mb-4 leading-relaxed font-bold">
+                    {lang === "ru" ? "🔓 Free план" : "🔓 Free Plan"}
                   </p>
                   <button
                     onClick={handleSubscribe}
                     disabled={isSubscribing}
-                    className="w-full py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-semibold rounded-lg text-xs transition-all active:scale-[0.98] disabled:opacity-50"
+                    className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs transition-all active:scale-[0.98] disabled:opacity-50 shadow-sm"
                   >
                     {isSubscribing 
                       ? (lang === "ru" ? "Активация..." : "Aktiviere...") 
-                      : (lang === "ru" ? "Активировать Premium" : "Premium aktivieren")}
+                      : (lang === "ru" ? "Upgrade до Premium — 150 ⭐" : "Upgrade auf Premium — 150 ⭐")}
                   </button>
                 </div>
               )
@@ -2184,7 +2198,46 @@ function App() {
         messages={chatMessages}
         setMessages={setChatMessages}
         onFoodLogged={handleFoodLogged}
+        isPremium={isPremium}
+        onUpgradeClick={(msg) => openUpgradeModal(msg)}
       />
+
+      {/* Premium Upgrade Modal */}
+      {upgradeModal.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-white rounded-2xl p-5 border border-zinc-200 shadow-2xl space-y-4">
+            <div className="flex items-center space-x-2 text-amber-500">
+              <span className="text-xl">⭐</span>
+              <h3 className="text-sm font-bold text-zinc-900">GainTracker Premium</h3>
+            </div>
+            <p className="text-xs text-zinc-600 leading-relaxed font-medium">
+              {upgradeModal.message || (lang === "ru" 
+                ? "⭐ Лимит 3 сообщения в день. Upgrade до Premium для безлимитного AI чата" 
+                : "⭐ Limit 3 Nachrichten/Tag. Upgrade auf Premium для безлимитного AI чата")}
+            </p>
+            <div className="space-y-2 pt-2">
+              <button
+                onClick={() => {
+                  setUpgradeModal({ isOpen: false, message: "" });
+                  handleSubscribe();
+                }}
+                disabled={isSubscribing}
+                className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs shadow-sm transition-all active:scale-[0.98] disabled:opacity-50"
+              >
+                {isSubscribing 
+                  ? (lang === "ru" ? "Загрузка инвойса..." : "Wird geladen...")
+                  : (lang === "ru" ? "Купить Premium — 150 Stars" : "Premium kaufen — 150 Stars")}
+              </button>
+              <button
+                onClick={() => setUpgradeModal({ isOpen: false, message: "" })}
+                className="w-full py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-semibold rounded-xl text-xs transition-colors"
+              >
+                {lang === "ru" ? "Закрыть" : "Schließen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
