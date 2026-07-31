@@ -1798,8 +1798,9 @@ app.post('/api/meals/regenerate', async (req, res) => {
   }
 });
 
-app.get('/api/debug-regenerate/:userId', async (req, res) => {
-  const { userId } = req.params;
+app.get(['/api/debug-regenerate', '/api/debug-regenerate/:userId'], async (req, res) => {
+  const userId = req.params.userId || req.query.userId;
+  if (!userId) return res.status(400).json({ error: 'userId parameter is required' });
   try {
     const { data: pData } = await supabase
       .from('profiles')
