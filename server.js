@@ -1721,7 +1721,7 @@ app.post('/api/meals/regenerate', async (req, res) => {
 
     const profilePromise = supabase
       .from('profiles')
-      .select('subscription_status, target_calories, goal')
+      .select('subscription_status, target_calories, goal, activity')
       .eq('telegram_id', String(userId))
       .maybeSingle();
 
@@ -1735,11 +1735,23 @@ app.post('/api/meals/regenerate', async (req, res) => {
     if (pData.subscription_status !== 'premium') return res.status(403).json({ error: 'Premium required' });
 
     const targetCalories = pData.target_calories || 2000;
+    const goal = pData.goal || 'gain';
+    const activity = pData.activity || 1.375;
+
+    const goalText = goal === 'gain' ? 'набор массы (профицит калорий)' 
+      : goal === 'loss' ? 'похудение (дефицит калорий)' 
+      : 'поддержание веса';
+
+    const activityText = activity <= 1.2 ? 'малоподвижный образ жизни' 
+      : activity <= 1.4 ? 'умеренная активность' 
+      : activity <= 1.6 ? 'высокая активность' 
+      : 'очень высокая активность';
 
     // 2. Form prompt for Groq
-    const prompt = `Составь меню на день для набора веса. Параметры: ${targetCalories} ккал в день, цель: набор массы.
+    const prompt = `Составь персональное меню на день. Параметры пользователя: ${targetCalories} ккал в день, цель: ${goalText}, активность: ${activityText}.
 Верни ТОЛЬКО JSON массив из 4 объектов, без пояснений, без markdown:
-[{"id":1,"name":"Завтрак: овсянка с бананом","calories":520,"protein":15,"fat":12,"carbs":80,"time":"09:00"},{"id":2,"name":"Обед: куриная грудка с рисом","calories":650,"protein":45,"fat":15,"carbs":60,"time":"13:00"},{"id":3,"name":"Перекус: творог с мёдом","calories":300,"protein":20,"fat":5,"carbs":40,"time":"17:00"},{"id":4,"name":"Ужин: говядина с картофелем","calories":700,"protein":50,"fat":25,"carbs":55,"time":"20:00"}]`;
+[{"id":1,"name":"Завтрак: овсянка с бананом","calories":520,"protein":15,"fat":12,"carbs":80,"time":"09:00"},{"id":2,"name":"Обед: куриная грудка с рисом","calories":650,"protein":45,"fat":15,"carbs":60,"time":"13:00"},{"id":3,"name":"Перекус: творог с мёдом","calories":300,"protein":20,"fat":5,"carbs":40,"time":"17:00"},{"id":4,"name":"Ужин: говядина с картофелем","calories":700,"protein":50,"fat":25,"carbs":55,"time":"20:00"}]
+Сумма калорий всех блюд должна быть близка к ${targetCalories} ккал.`;
 
     // 3. Call Groq (model llama-3.3-70b-versatile, temperature 0.7)
     let completion;
