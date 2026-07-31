@@ -1796,8 +1796,10 @@ bot.use(async (ctx, next) => {
 });
 
 bot.command('start', async (ctx) => {
+  const startPayload = ctx.match || '';
+  const startParamQuery = startPayload ? `&startapp=${encodeURIComponent(startPayload)}` : '';
   const baseUrl = process.env.WEBAPP_URL || `http://localhost:${PORT}`; 
-  const webAppUrl = baseUrl.includes('?') ? `${baseUrl}&v=${DATA_VERSION}&tgUserId=${ctx.from.id}` : `${baseUrl}?v=${DATA_VERSION}&tgUserId=${ctx.from.id}`; 
+  const webAppUrl = baseUrl.includes('?') ? `${baseUrl}&v=${DATA_VERSION}&tgUserId=${ctx.from.id}${startParamQuery}` : `${baseUrl}?v=${DATA_VERSION}&tgUserId=${ctx.from.id}${startParamQuery}`; 
   const startText = "Привет! Я твой персональный фитнес-трекер питания GainTracker готов к работе. Нажми кнопку ниже, чтобы открыть приложение, или напиши мне свой возраст, рост и вес через пробел.";
   await ctx.reply(startText, {
     reply_markup: {
