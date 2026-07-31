@@ -1007,6 +1007,7 @@ function App() {
 
   // Full day AI-powered menu regeneration endpoint
   const handleRegenerateMenu = async () => {
+    console.log('handleRegenerateMenu called, isPremium:', isPremium, 'profile?.subscription_status:', profile?.subscription_status, 'profile?.subscriptionStatus:', profile?.subscriptionStatus);
     setIsRegenerating(true);
     try {
       const res = await fetch("/api/meals/regenerate", {
