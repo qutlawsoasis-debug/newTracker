@@ -545,6 +545,8 @@ app.post('/api/referral/register', requireAuth, async (req, res) => {
   const userId = req.user.id;
   const { referrerId } = req.body;
 
+  console.log("Referral register called:", { userId, referrerId });
+
   if (!referrerId || referrerId === userId.toString()) {
     return res.status(400).json({ error: "Cannot refer yourself or missing referrerId" });
   }
@@ -576,7 +578,14 @@ app.post('/api/referral/register', requireAuth, async (req, res) => {
         .eq('telegram_id', referrerId.toString())
         .maybeSingle();
 
+      const currentPts = currentPtsData?.points || 0;
       const newPoints = currentPts + 50;
+
+      await supabase.from('user_points').upsert({
+        telegram_id: referrerId.toString(),
+        points: newPoints,
+        updated_at: new Date().toISOString()
+      });
 
       // Telegram notification to Referrer
       try {
@@ -600,9 +609,9 @@ app.post('/api/referral/register', requireAuth, async (req, res) => {
 
       return res.json({ success: true, bonusDays: 0 });
     } catch (err) {
-      logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
-      console.error("Referral registration failed:", err);
-      return res.status(500).json({ error: "Failed to register referral" });
+      console.error("Referral register error:", err.message, err.stack);
+      res.locals.errorMessage = err.message;
+      return res.status(500).json({ error: err.message });
     }
   }
 
