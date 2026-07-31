@@ -1022,6 +1022,46 @@ app.post('/api/profile/gps', requireAuth, async (req, res) => {
   }
 });
 
+// Endpoint GET /api/profile/:userId (No-cache profile lookup)
+app.get('/api/profile/:userId', requireAuth, async (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  const userId = req.params.userId || req.user.id;
+
+  if (supabase) {
+    try {
+      const { data: pData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('telegram_id', userId.toString())
+        .maybeSingle();
+
+      if (pData) {
+        const profile = {
+          gender: pData.gender,
+          age: pData.age,
+          height: pData.height,
+          weight: pData.weight,
+          activity: parseFloat(pData.activity),
+          goal: pData.goal,
+          targetCalories: pData.target_calories,
+          aiAnalysisText: pData.ai_analysis_text,
+          subscriptionStatus: pData.subscription_status || "free",
+          subscriptionExpiresAt: pData.subscription_expires_at || null,
+          createdAt: pData.created_at || null,
+          user_ip: pData.user_ip || null,
+          country: pData.country || null,
+          region_name: pData.region_name || null,
+          city: pData.city || null
+        };
+        return res.json({ profile });
+      }
+    } catch (err) {
+      console.error("Failed to fetch profile:", err);
+    }
+  }
+  return res.json({ profile: null });
+});
+
 // API to trigger Telegram location request message in chat
 app.post('/api/profile/trigger-geo-button', requireAuth, async (req, res) => {
   const { userId: _unused } = req.body;
@@ -1407,6 +1447,7 @@ app.post('/api/profile', requireAuth, async (req, res) => {
 
 // API to get/generate meal plan and schedule settings
 app.get('/api/meals', requireAuth, async (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   const { regenerate } = req.query;
   const userId = req.user.id;
 
@@ -1809,15 +1850,13 @@ app.post('/api/telegram-webhook', async (req, res) => {
         const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
         if (supabase && userId) {
-          const { error: updateErr } = await supabase.from('profiles').update({
+          const { error: updateError } = await supabase.from('profiles').update({
             subscription_status: 'premium',
-            subscription_expires_at: expiresAt,
+            subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
             updated_at: new Date().toISOString()
           }).eq('telegram_id', userId);
 
-          if (updateErr) {
-            console.error("Profiles update error in successful_payment:", updateErr);
-          }
+          console.log('UPDATE error:', updateError);
 
           const { data: updatedProf, error: checkErr } = await supabase
             .from('profiles')

@@ -519,6 +519,7 @@ function App() {
           window.Telegram.WebApp.openInvoice(data.invoiceLink, async (status) => {
             if (status === 'paid') {
               console.log("Payment successful!");
+              await new Promise(resolve => setTimeout(resolve, 3000));
               if (userId) {
                 try {
                   const pRes = await fetch(`/api/profile/${userId}`);
