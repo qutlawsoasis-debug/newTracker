@@ -1206,6 +1206,37 @@ app.post('/api/system/log', async (req, res) => {
   res.json({ success: true });
 });
 
+app.get('/api/npc/chat-limit', requireAuth, async (req, res) => {
+  const userId = req.user.id;
+  const today = new Date().toISOString().split('T')[0];
+
+  if (!supabase) return res.json({ count: 0, limitReached: false, isPremium: false });
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_status')
+    .eq('telegram_id', userId)
+    .maybeSingle();
+  
+  if (profile?.subscription_status === 'premium') {
+    return res.json({ count: 0, limitReached: false, isPremium: true });
+  }
+  
+  const { count } = await supabase
+    .from('app_logs')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('endpoint', '/api/npc/chat')
+    .eq('method', 'POST')
+    .gte('timestamp', today + 'T00:00:00.000Z');
+  
+  res.json({ 
+    count: count || 0, 
+    limitReached: (count || 0) >= 3,
+    isPremium: false
+  });
+});
+
 app.post('/api/npc/chat', requireAuth, async (req, res) => {
   const { message, image, history } = req.body;
   const userId = req.user.id;
@@ -1216,6 +1247,32 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
 
   if (!groqApiKey) {
     return res.status(500).json({ error: 'AI features are not configured (missing Groq API key)' });
+  }
+
+  if (supabase) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('subscription_status')
+      .eq('telegram_id', userId)
+      .maybeSingle();
+
+    if (profile?.subscription_status !== 'premium') {
+      const today = new Date().toISOString().split('T')[0];
+      const { count } = await supabase
+        .from('app_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('endpoint', '/api/npc/chat')
+        .eq('method', 'POST')
+        .gte('timestamp', today + 'T00:00:00.000Z');
+      
+      if ((count || 0) >= 3) {
+        return res.status(403).json({
+          error: "FREE_LIMIT",
+          message: "Лимит 3 сообщения в день."
+        });
+      }
+    }
   }
 
   try {

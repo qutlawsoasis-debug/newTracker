@@ -6,10 +6,19 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  const todayStr = new Date().toISOString().split('T')[0];
-  const chatCountKey = `ai_chat_count_${userId}_${todayStr}`;
-  const currentChatCount = parseInt(localStorage.getItem(chatCountKey) || "0", 10);
-  const isLimitReached = !isPremium && currentChatCount >= 3;
+  const [chatCount, setChatCount] = useState(0);
+  const [isLimitReached, setIsLimitReached] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || isPremium || !userId) return;
+    fetch(`/api/npc/chat-limit?userId=${userId}`)
+      .then(r => r.json())
+      .then(data => {
+        setChatCount(data.count || 0);
+        setIsLimitReached(data.limitReached || false);
+      })
+      .catch(() => {});
+  }, [isOpen, isPremium, userId]);
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -73,7 +82,7 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
 
     if (isLimitReached) {
       if (onUpgradeClick) {
-        onUpgradeClick(lang === "ru" ? "⭐ Лимит 3 сообщения в день. Upgrade до Premium для безлимитного AI чата" : "⭐ Limit 3 Nachrichten/Tag. Upgrade auf Premium für unbegrenzten KI-Chat");
+        onUpgradeClick(lang === "ru" ? "⭐ Лимит 3 сообщения в день. Upgrade до Premium для безлимитного AI чата" : "⭐ Limit 3 Nachrichten/Tag. Upgrade auf Premium für den unbegrenzten KI-Chat");
       }
       return;
     }
@@ -100,6 +109,12 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
         let errStr = "Chat request failed";
         try {
           const errData = await res.json();
+          if (errData.error === "FREE_LIMIT") {
+            setIsLimitReached(true);
+            if (onUpgradeClick) {
+              onUpgradeClick(lang === "ru" ? "⭐ Лимит 3 сообщения в день. Upgrade до Premium для безлимитного AI чата" : "⭐ Limit 3 Nachrichten/Tag. Upgrade auf Premium für den unbegrenzten KI-Chat");
+            }
+          }
           if (errData.error) errStr = errData.error;
         } catch(e) {}
         throw new Error(errStr);
@@ -110,7 +125,11 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
       setMessages(prev => [...prev, { sender: "npc", text: data.text }]);
       
       if (!isPremium) {
-        localStorage.setItem(chatCountKey, String(currentChatCount + 1));
+        setChatCount(prev => {
+          const next = prev + 1;
+          if (next >= 3) setIsLimitReached(true);
+          return next;
+        });
       }
 
       if (data.food_log) {
