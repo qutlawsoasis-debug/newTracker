@@ -213,7 +213,7 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
               <p className="text-xs text-zinc-400">
                 {isPremium
                   ? (lang === "ru" ? "⭐ Premium активен (безлимит)" : "⭐ Premium active (unlimited)")
-                  : (lang === "ru" ? `Использовано ${currentChatCount}/3 сообщений` : `Used ${currentChatCount}/3 messages`)}
+                  : (lang === "ru" ? `Использовано ${chatCount}/3 сообщений` : `Used ${chatCount}/3 messages`)}
               </p>
             </div>
           </div>
