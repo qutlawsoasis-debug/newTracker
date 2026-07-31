@@ -919,12 +919,14 @@ const getGlobalAnalytics = async (userId) => {
 
 // API to create Telegram Stars invoice for Premium subscription
 app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
-  const userId = req.user.id || req.body?.userId;
-  if (!userId) {
-    return res.status(400).json({ error: 'Bad Request: Missing userId' });
-  }
-
   try {
+    const userId = req.user?.id || req.body?.userId;
+    if (!userId) {
+      return res.status(400).json({ error: 'Bad Request: Missing userId' });
+    }
+
+    console.log("Creating invoice link for userId:", userId);
+
     const invoiceLink = await bot.api.callApi("createInvoiceLink", {
       title: "GainTracker Premium",
       description: "30 дней Premium: AI чат без ограничений, замена блюд, обновление меню через AI",
@@ -933,11 +935,12 @@ app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
       prices: [{ label: "Premium 30 дней", amount: 150 }]
     });
 
+    console.log("Invoice link created successfully:", invoiceLink);
     return res.json({ invoiceLink });
-  } catch (err) {
-    logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
-    console.error("Failed to create invoice link:", err);
-    return res.status(500).json({ error: "Failed to create invoice link: " + err.message });
+  } catch (error) {
+    console.error('Subscribe error:', error.message, error.stack);
+    logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', error?.message || String(error), error?.stack || '', 'Auto-captured backend error');
+    return res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
