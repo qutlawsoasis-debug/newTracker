@@ -1465,6 +1465,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
   let profile = null;
   let weightHistory = [];
   let planData = null;
+  let fallbackMeals = null;
 
   if (supabase) {
     try {
@@ -1662,7 +1663,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
     
     // Fallback to standard deterministic generation in case Gemini fails
     const pool = profile.goal === 'gain' ? mealsData.high : mealsData.light;
-    let fallbackMeals = {
+    fallbackMeals = {
       breakfast: pool.breakfast[getDailyRandomIndex(pool.breakfast, "breakfast")],
       lunch: pool.lunch[getDailyRandomIndex(pool.lunch, "lunch")],
       night: pool.night[getDailyRandomIndex(pool.night, "night")],
