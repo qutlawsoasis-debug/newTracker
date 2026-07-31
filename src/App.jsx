@@ -1016,10 +1016,11 @@ function App() {
         body: JSON.stringify({ userId })
       });
       const data = await res.json();
+      console.log('current meals state type:', typeof meals, Array.isArray(meals) ? 'array' : 'object');
+      console.log('received meals type:', typeof data.meals, Array.isArray(data.meals) ? 'array' : 'object');
       console.log('regenerate full response:', JSON.stringify(data).slice(0, 500));
-      console.log('data.meals type:', typeof data.meals, 'length:', data.meals?.length, 'first item:', JSON.stringify(data.meals?.[0]).slice(0, 100));
 
-      if (data.meals && Array.isArray(data.meals) && data.meals.length > 0) {
+      if (data.meals && typeof data.meals === 'object' && Object.keys(data.meals).length > 0) {
         setMeals(data.meals);
         setEatenMeals([]);
         alert('✅ Меню обновлено!');

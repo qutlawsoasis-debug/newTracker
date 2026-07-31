@@ -1771,26 +1771,67 @@ app.post('/api/meals/regenerate', async (req, res) => {
 
     const text = completion.choices[0].message.content.trim();
     let cleanJson = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-    let mealsArray = [];
+    let parsed;
     try {
-      const parsed = JSON.parse(cleanJson);
-      mealsArray = Array.isArray(parsed) ? parsed : (parsed.meals || parsed.items || []);
+      parsed = JSON.parse(cleanJson);
     } catch (parseErr) {
       console.error("Failed to parse Groq response JSON:", cleanJson);
       throw new Error("Invalid JSON format returned from Groq");
     }
 
-    console.log('regenerate: parsed meals', JSON.stringify(mealsArray).slice(0, 300));
+    let mealsFormatted = {};
+    if (Array.isArray(parsed)) {
+      const keys = ['breakfast', 'lunch', 'night', 'snack'];
+      parsed.forEach((item, index) => {
+        const key = keys[index] || `section_${index}`;
+        mealsFormatted[key] = {
+          id: item.id || `ai-${key}`,
+          title_ru: item.name || item.title_ru || item.title || key,
+          title_de: item.title_de || item.name || item.title || key,
+          calories: Number(item.calories) || 0,
+          protein: Number(item.protein) || 0,
+          fat: Number(item.fat) || 0,
+          carbs: Number(item.carbs) || 0,
+          time: item.time || (index === 0 ? "08:00" : index === 1 ? "13:00" : index === 2 ? "18:00" : "21:00"),
+          eaten: false,
+          recipe_ru: item.recipe_ru || item.recipe || "Сбалансированный прием пищи",
+          products_ru: item.products_ru || item.products || []
+        };
+      });
+    } else if (typeof parsed === 'object' && parsed !== null) {
+      const source = parsed.meals || parsed;
+      Object.keys(source).forEach(k => {
+        const normKey = k === 'dinner' ? 'night' : k;
+        const item = source[k];
+        if (item && typeof item === 'object') {
+          mealsFormatted[normKey] = {
+            id: item.id || `ai-${normKey}`,
+            title_ru: item.title_ru || item.name || item.title || normKey,
+            title_de: item.title_de || item.name || item.title || normKey,
+            calories: Number(item.calories) || 0,
+            protein: Number(item.protein) || 0,
+            fat: Number(item.fat) || 0,
+            carbs: Number(item.carbs) || 0,
+            time: item.time || "12:00",
+            eaten: false,
+            recipe_ru: item.recipe_ru || item.recipe || "Сбалансированный прием пищи",
+            products_ru: item.products_ru || item.products || []
+          };
+        }
+      });
+    }
+
+    console.log('regenerate: returning meals format:', JSON.stringify(mealsFormatted).slice(0, 300));
 
     // 4. Save in daily_plans (upsert by telegram_id + date)
     const today = new Date().toDateString();
     await supabase.from('daily_plans').upsert({
       telegram_id: userId.toString(),
       date: today,
-      meals: mealsArray
+      meals: mealsFormatted
     });
 
-    return res.json({ meals: mealsArray });
+    return res.json({ meals: mealsFormatted });
   } catch (e) {
     console.error('regenerate: FATAL', e.message, e.stack?.slice(0, 300));
     logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', e?.message || String(e), e?.stack || '', 'Auto-captured backend error');
