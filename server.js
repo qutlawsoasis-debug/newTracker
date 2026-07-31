@@ -155,10 +155,7 @@ app.use(express.static(distPath));
 
 // Strict Data Isolation Auth Middleware
 const requireAuth = (req, res, next) => {
-  if (!req.query.userId && !req.body?.userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
-  const rawUserId = req.query.userId || req.body?.userId || req.headers['x-user-id'];
+  const rawUserId = req.params?.userId || req.query?.userId || req.body?.userId || req.headers['x-user-id'];
   if (!rawUserId || rawUserId === 'undefined' || rawUserId === 'null') {
     console.warn(`[SECURITY] Blocked anonymous request to ${req.originalUrl}`);
     return res.status(401).json({ error: 'Unauthorized: Missing telegram_id (userId)' });
@@ -1029,9 +1026,12 @@ app.post('/api/profile/gps', requireAuth, async (req, res) => {
 });
 
 // Endpoint GET /api/profile/:userId (No-cache profile lookup)
-app.get('/api/profile/:userId', requireAuth, async (req, res) => {
+app.get('/api/profile/:userId', async (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  const userId = req.params.userId || req.user.id;
+  const userId = req.params.userId || req.query.userId;
+  if (!userId || userId === 'undefined' || userId === 'null') {
+    return res.status(400).json({ error: 'userId required' });
+  }
 
   if (supabase) {
     try {
