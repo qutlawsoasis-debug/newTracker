@@ -911,6 +911,16 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, section, lang })
       });
+      if (res.status === 403) {
+        const data = await res.json().catch(() => ({}));
+        if (data.error === "PREMIUM_ONLY" || res.status === 403) {
+          const confirmUpgrade = window.confirm("Эта функция доступна в Premium (150 ⭐). Активировать?");
+          if (confirmUpgrade) {
+            handleSubscribe();
+          }
+          return;
+        }
+      }
       if (res.ok) {
         const contentType = res.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
@@ -929,7 +939,7 @@ function App() {
     } catch (err) {
       console.error("Ready-to-eat replacement failed", err);
     }
-  }, [profile, userId, lang]);
+  }, [profile, userId, lang, handleSubscribe]);
 
   // Log weight entry into history
   const logWeight = useCallback((weightVal) => {

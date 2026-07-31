@@ -1902,6 +1902,13 @@ app.post('/api/meals/replace-ready', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Bad Request: Missing profile, meals, or section' });
     }
 
+    if (profile.subscription_status !== 'premium') {
+      return res.status(403).json({ 
+        error: "PREMIUM_ONLY",
+        message: "Эта функция доступна только в Premium"
+      });
+    }
+
     const currentMeal = plan.meals[section];
     const targetCalories = currentMeal.calories;
 
@@ -1919,8 +1926,9 @@ app.post('/api/meals/replace-ready', requireAuth, async (req, res) => {
 
     return res.json({ success: true, meal: readyMeal });
   } catch (err) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
+    logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
     console.error("Ready-to-eat replacement failed:", err);
+    return res.status(500).json({ error: err.message });
   }
 });
 
