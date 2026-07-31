@@ -1733,6 +1733,8 @@ app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
 
     console.log('regenerate: userId', userId);
     console.log('regenerate: profile', JSON.stringify(pData));
+    console.log('regenerate: groq client exists?', !!groq);
+    console.log('regenerate: GROQ_API_KEY exists?', !!process.env.GROQ_API_KEY);
 
     if (!pData || pData.subscription_status !== 'premium') {
       return res.status(403).json({ error: 'Premium required' });
@@ -1747,16 +1749,21 @@ app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
 Только JSON, без пояснений.`;
 
     // 3. Call Groq (model llama-3.3-70b-versatile, temperature 0.7)
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.7,
-      messages: [
-        { role: "system", content: "You are a professional nutrition expert. Return ONLY valid JSON array without markdown code blocks or explanations." },
-        { role: "user", content: prompt }
-      ]
-    });
-
-    console.log('regenerate: groq response', JSON.stringify(completion?.choices?.[0]?.message?.content).slice(0, 300));
+    let completion;
+    try {
+      completion = await groq.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
+        temperature: 0.7,
+        messages: [
+          { role: "system", content: "You are a professional nutrition expert. Return ONLY valid JSON array without markdown code blocks or explanations." },
+          { role: 'user', content: prompt }
+        ]
+      });
+      console.log('regenerate: groq raw response', JSON.stringify(completion?.choices?.[0]?.message?.content).slice(0, 500));
+    } catch (groqErr) {
+      console.error('regenerate: GROQ ERROR', groqErr.message);
+      return res.status(500).json({ error: 'Groq failed: ' + groqErr.message });
+    }
 
     const text = completion.choices[0].message.content.trim();
     let cleanJson = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
