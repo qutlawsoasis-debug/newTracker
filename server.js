@@ -518,6 +518,26 @@ app.post('/api/weight-history', requireAuth, async (req, res) => {
   return res.json({ success: true, entry: { date: dateStr, weight: numWeight } });
 });
 
+app.post('/api/debug-params', async (req, res) => {
+  console.log("DEBUG PARAMS:", JSON.stringify(req.body));
+  if (supabase) {
+    try {
+      await supabase.from('app_logs').insert({
+        user_id: req.body.userId || 'unknown',
+        method: 'DEBUG',
+        endpoint: '/api/debug-params',
+        status_code: 200,
+        duration_ms: 0,
+        error_message: null,
+        metadata: req.body
+      });
+    } catch (e) {
+      console.warn("Failed to log debug params to app_logs:", e.message);
+    }
+  }
+  res.json({ ok: true });
+});
+
 // ─── Referral System Endpoints ───
 
 // Endpoint POST /api/referral/register

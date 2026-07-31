@@ -551,6 +551,18 @@ function App() {
         hash: window.location.hash,
         startapp
       });
+
+      fetch('/api/debug-params', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'unknown',
+          tgParam: window.Telegram?.WebApp?.initDataUnsafe?.start_param || '',
+          search: window.location.search,
+          hash: window.location.hash,
+          initDataUnsafe: JSON.stringify(window.Telegram?.WebApp?.initDataUnsafe || {})
+        })
+      }).catch(() => {});
       
       if (startapp.startsWith('ref_')) {
         const refId = startapp.replace('ref_', '');
