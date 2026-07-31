@@ -507,7 +507,17 @@ function App() {
         throw new Error("Server error: " + res.status);
       }
       const data = await res.json();
-      if (data.success && profile) {
+      if (data.invoiceLink) {
+        if (window.Telegram?.WebApp?.openInvoice) {
+          window.Telegram.WebApp.openInvoice(data.invoiceLink, (status) => {
+            if (status === 'paid') {
+              console.log("Payment successful!");
+            }
+          });
+        } else {
+          window.open(data.invoiceLink, '_blank');
+        }
+      } else if (data.success && profile) {
         setProfile(prev => ({
           ...prev,
           subscriptionStatus: data.subscriptionStatus,

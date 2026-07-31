@@ -917,67 +917,27 @@ const getGlobalAnalytics = async (userId) => {
   };
 };
 
-// API to simulate subscribing to Premium status
+// API to create Telegram Stars invoice for Premium subscription
 app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
-  const { userId: _unused } = req.body;
-  const userId = req.user.id;
+  const userId = req.user.id || req.body?.userId;
   if (!userId) {
     return res.status(400).json({ error: 'Bad Request: Missing userId' });
   }
 
   try {
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days from now
-    
-    const updatedData = {
-      subscription_status: 'premium',
-      subscription_expires_at: expiresAt.toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    const invoiceLink = await bot.api.callApi("createInvoiceLink", {
+      title: "GainTracker Premium",
+      description: "30 дней Premium: AI чат без ограничений, замена блюд, обновление меню через AI",
+      payload: JSON.stringify({ userId: userId.toString(), type: "premium_30d" }),
+      currency: "XTR",
+      prices: [{ label: "Premium 30 дней", amount: 150 }]
+    });
 
-    if (supabase) {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updatedData)
-        .eq('telegram_id', userId.toString());
-      if (error) throw error;
-
-      // Check and process referral conversion reward (+200 points)
-      try {
-        const { data: refRecord } = await supabase
-          .from('referrals')
-          .select('id, referrer_id, converted')
-          .eq('invitee_id', userId.toString())
-          .maybeSingle();
-
-        if (refRecord && !refRecord.converted) {
-          const { data: refPts } = await supabase
-            .from('user_points')
-            .select('points')
-            .eq('telegram_id', refRecord.referrer_id)
-            .maybeSingle();
-
-          const newPoints = (refPts?.points || 0) + 200;
-          await supabase.from('user_points').upsert({
-            telegram_id: refRecord.referrer_id,
-            points: newPoints,
-            updated_at: new Date().toISOString()
-          });
-
-          await supabase.from('referrals').update({ converted: true }).eq('id', refRecord.id);
-        }
-      } catch (refErr) {
-        console.error("Failed to process referral conversion on subscribe:", refErr);
-      }
-    }
-    
-    // Update local cache if fallback exists
-
-    return res.json({ success: true, subscriptionStatus: 'premium', subscriptionExpiresAt: expiresAt.toISOString() });
+    return res.json({ invoiceLink });
   } catch (err) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
-    console.error("Failed to subscribe:", err);
-    return res.status(500).json({ error: "Failed to update subscription: " + err.message });
+    logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
+    console.error("Failed to create invoice link:", err);
+    return res.status(500).json({ error: "Failed to create invoice link: " + err.message });
   }
 });
 
@@ -1814,8 +1774,88 @@ app.get('/api/logs', async (req, res) => {
 
 app.post('/api/telegram-webhook', async (req, res) => {
   try {
+    const update = req.body;
+
+    // Handle Telegram Stars pre_checkout_query
+    if (update?.pre_checkout_query) {
+      try {
+        await bot.api.answerPreCheckoutQuery(update.pre_checkout_query.id, true);
+      } catch (pcErr) {
+        console.error("Error answering pre_checkout_query:", pcErr);
+      }
+    }
+
+    // Handle Telegram Stars successful_payment
+    if (update?.message?.successful_payment) {
+      try {
+        const payment = update.message.successful_payment;
+        let paidUserId = update.message.from?.id;
+        try {
+          const payloadData = JSON.parse(payment.invoice_payload || '{}');
+          if (payloadData.userId) paidUserId = payloadData.userId;
+        } catch (e) {}
+
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+        if (supabase && paidUserId) {
+          await supabase.from('profiles').update({
+            subscription_status: 'premium',
+            subscription_expires_at: expiresAt,
+            updated_at: new Date().toISOString()
+          }).eq('telegram_id', paidUserId.toString());
+
+          // Check if user was referred (+200 points to referrer)
+          const { data: refRecord } = await supabase
+            .from('referrals')
+            .select('id, referrer_id, converted')
+            .eq('invitee_id', paidUserId.toString())
+            .maybeSingle();
+
+          if (refRecord && !refRecord.converted) {
+            const { data: refPts } = await supabase
+              .from('user_points')
+              .select('points')
+              .eq('telegram_id', refRecord.referrer_id)
+              .maybeSingle();
+
+            const newPoints = (refPts?.points || 0) + 200;
+            await supabase.from('user_points').upsert({
+              telegram_id: refRecord.referrer_id,
+              points: newPoints,
+              updated_at: new Date().toISOString()
+            });
+
+            await supabase.from('referrals').update({ converted: true }).eq('id', refRecord.id);
+
+            try {
+              await bot.api.sendMessage(
+                refRecord.referrer_id,
+                "🎁 Ваш реферал купил Premium! +200 баллов на счету"
+              );
+            } catch (bErr) {
+              console.warn("Failed to notify referrer:", bErr.message);
+            }
+          }
+        }
+
+        if (paidUserId) {
+          try {
+            await bot.api.sendMessage(
+              paidUserId.toString(),
+              "✅ Premium активирован на 30 дней! Enjoy 🎉"
+            );
+          } catch (bErr) {
+            console.warn("Failed to notify buyer:", bErr.message);
+          }
+        }
+      } catch (payErr) {
+        console.error("Error handling successful_payment:", payErr);
+      }
+    }
+
     await bot.init();
-    await bot.handleUpdate(req.body);
+    await bot.handleUpdate(update);
   } catch (err) {
     console.error("Telegram webhook handling error:", err);
   }
