@@ -655,6 +655,7 @@ function App() {
   }, [userId, tgUser]);
 
   const handleOnboardingComplete = useCallback(async (onboardingData) => {
+    console.log("handleOnboardingComplete called:", { userId, referrerId });
     try {
       const res = await fetch("/api/profile", {
         method: "POST",
@@ -710,6 +711,7 @@ function App() {
 
       // Check and register referral if referrerId is set from tgStartParam
       if (referrerId && referrerId !== userId.toString()) {
+        console.log("Registering referral:", { userId, referrerId });
         try {
           await fetch("/api/referral/register", {
             method: "POST",
@@ -726,7 +728,7 @@ function App() {
       console.error("Onboarding completion failed:", err);
       alert("Error creating profile: " + err.message);
     }
-  }, [userId]);
+  }, [userId, referrerId]);
 
   // Persist schedule, meals, profile, and eaten state updates
   useEffect(() => {
