@@ -532,11 +532,37 @@ function App() {
                     }
                   }
                 } catch (e) {}
-                if (attempts < 10) {
+                if (attempts < 15) {
                   setTimeout(pollProfile, 2000);
                 }
               };
               setTimeout(pollProfile, 2000);
+            } else if (status === 'cancelled') {
+              // ничего не делаем
+            } else if (status === 'failed') {
+              alert('Оплата не прошла. Попробуй ещё раз.');
+            } else {
+              // status === 'pending' или другой
+              // запускаем polling всё равно — Telegram Android иногда не возвращает 'paid'
+              let attempts = 0;
+              const pollProfile = async () => {
+                attempts++;
+                try {
+                  const pRes = await fetch(`/api/meals?userId=${userId}`);
+                  if (pRes.ok) {
+                    const pData = await pRes.json();
+                    if (pData.profile?.subscription_status === 'premium') {
+                      setProfile(pData.profile);
+                      alert('✅ Premium активирован!');
+                      return;
+                    }
+                  }
+                } catch (e) {}
+                if (attempts < 15) {
+                  setTimeout(pollProfile, 2000);
+                }
+              };
+              setTimeout(pollProfile, 3000);
             }
           });
         } else {
@@ -588,7 +614,6 @@ function App() {
 
   useEffect(() => {
     const checkStartParam = () => {
-      // Все возможные источники
       const tgParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param || '';
       const urlSearch = new URLSearchParams(window.location.search);
       const urlHash = new URLSearchParams(window.location.hash.replace('#', ''));
@@ -599,25 +624,6 @@ function App() {
         || urlHash.get('startapp')
         || urlHash.get('tgWebAppStartParam')
         || '';
-      
-      console.log("ALL PARAMS:", {
-        tgParam,
-        search: window.location.search,
-        hash: window.location.hash,
-        startapp
-      });
-
-      fetch('/api/debug-params', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'unknown',
-          tgParam: window.Telegram?.WebApp?.initDataUnsafe?.start_param || '',
-          search: window.location.search,
-          hash: window.location.hash,
-          initDataUnsafe: JSON.stringify(window.Telegram?.WebApp?.initDataUnsafe || {})
-        })
-      }).catch(() => {});
       
       if (startapp.startsWith('ref_')) {
         const refId = startapp.replace('ref_', '');

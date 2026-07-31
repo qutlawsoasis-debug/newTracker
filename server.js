@@ -519,25 +519,6 @@ app.post('/api/weight-history', requireAuth, async (req, res) => {
   return res.json({ success: true, entry: { date: dateStr, weight: numWeight } });
 });
 
-app.post('/api/debug-params', async (req, res) => {
-  console.log("DEBUG PARAMS:", JSON.stringify(req.body));
-  if (supabase) {
-    try {
-      await supabase.from('app_logs').insert({
-        user_id: req.body.userId || 'unknown',
-        method: 'DEBUG',
-        endpoint: '/api/debug-params',
-        status_code: 200,
-        duration_ms: 0,
-        error_message: null,
-        metadata: req.body
-      });
-    } catch (e) {
-      console.warn("Failed to log debug params to app_logs:", e.message);
-    }
-  }
-  res.json({ ok: true });
-});
 
 // ─── Referral System Endpoints ───
 
@@ -737,28 +718,6 @@ app.get('/api/referral/raw-tables', async (req, res) => {
   return res.json({ referrals: refData || [], user_points: ptsData || [] });
 });
 
-app.get('/api/referral/reset-test', async (req, res) => {
-  if (!supabase) return res.json({ error: "No Supabase connection" });
-  
-  const { data: refData, error: refErr } = await supabase
-    .from('referrals')
-    .update({ converted: false })
-    .eq('invitee_id', '5941010722')
-    .select();
-
-  const { data: ptsData, error: ptsErr } = await supabase
-    .from('user_points')
-    .update({ points: 50 })
-    .eq('telegram_id', '8319427555')
-    .select();
-
-  return res.json({
-    referrals: refData || [],
-    referrals_error: refErr?.message || null,
-    user_points: ptsData || [],
-    user_points_error: ptsErr?.message || null
-  });
-});
 
 const ensureUserGeolocation = async (userId, profileData, req) => {
   if (!supabase || !profileData || !userId) return profileData;
@@ -1860,52 +1819,6 @@ app.post('/api/meals/regenerate', async (req, res) => {
   }
 });
 
-app.get('/api/debug-regenerate', async (req, res) => {
-  const userId = req.query.userId;
-  if (!userId) return res.status(400).json({ error: 'userId parameter is required' });
-  try {
-    const { data: pData } = await supabase
-      .from('profiles')
-      .select('subscription_status, target_calories, goal')
-      .eq('telegram_id', String(userId))
-      .maybeSingle();
-    
-    const { data: planData } = await supabase
-      .from('daily_plans')
-      .select('meals, date')
-      .eq('telegram_id', String(userId))
-      .order('date', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    
-    return res.json({ profile: pData, lastPlan: planData });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-app.get('/api/debug-regenerate/:userId', async (req, res) => {
-  const userId = req.params.userId || req.query.userId;
-  try {
-    const { data: pData } = await supabase
-      .from('profiles')
-      .select('subscription_status, target_calories, goal')
-      .eq('telegram_id', String(userId))
-      .maybeSingle();
-    
-    const { data: planData } = await supabase
-      .from('daily_plans')
-      .select('meals, date')
-      .eq('telegram_id', String(userId))
-      .order('date', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    
-    return res.json({ profile: pData, lastPlan: planData });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
 
 // API to save general schedule settings and check weight logs
 app.post('/api/meals', requireAuth, async (req, res) => {
