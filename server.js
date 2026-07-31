@@ -59,15 +59,12 @@ if (supabase) {
           description: currentDesc,
           created_at: new Date().toISOString()
         });
-        if (error) {
-          console.error('[Startup Seed] Failed to seed app_versions:', error);
-        } else {
+        if (!error) {
           console.log(`[Startup Seed] Successfully upserted version ${DATA_VERSION} into app_versions table!`);
         }
       }
     } catch (err) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
-      console.error('[Startup Seed] Error during app_versions seeding:', err);
+      // Таблица app_versions может не существовать (PGRST205), молча игнорируем
     }
   })();
 }
@@ -415,13 +412,17 @@ app.get('/api/changelog', async (req, res) => {
   try {
     let description = "";
     if (supabase) {
-      const { data, error } = await supabase
-        .from('app_versions')
-        .select('description')
-        .eq('version', version)
-        .maybeSingle();
-      if (!error && data) {
-        description = data.description;
+      try {
+        const { data, error } = await supabase
+          .from('app_versions')
+          .select('description')
+          .eq('version', version)
+          .maybeSingle();
+        if (!error && data) {
+          description = data.description;
+        }
+      } catch (e) {
+        // Игнорируем отсутствие таблицы
       }
     }
 
@@ -2163,13 +2164,17 @@ const notifyUpdate = async () => {
   try {
     let description = "";
     if (supabase) {
-      const { data, error } = await supabase
-        .from('app_versions')
-        .select('description')
-        .eq('version', DATA_VERSION)
-        .maybeSingle();
-      if (!error && data) {
-        description = data.description;
+      try {
+        const { data, error } = await supabase
+          .from('app_versions')
+          .select('description')
+          .eq('version', DATA_VERSION)
+          .maybeSingle();
+        if (!error && data) {
+          description = data.description;
+        }
+      } catch (e) {
+        // Игнорируем отсутствие таблицы
       }
     }
 
