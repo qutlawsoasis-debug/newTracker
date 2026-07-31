@@ -516,20 +516,27 @@ function App() {
       const data = await res.json();
       if (data.invoiceLink) {
         if (window.Telegram?.WebApp?.openInvoice) {
-          window.Telegram.WebApp.openInvoice(data.invoiceLink, async (status) => {
+          window.Telegram.WebApp.openInvoice(data.invoiceLink, (status) => {
             if (status === 'paid') {
-              await new Promise(resolve => setTimeout(resolve, 5000));
-              try {
-                const pRes = await fetch(`/api/profile/${userId}`);
-                if (pRes.ok) {
-                  const pData = await pRes.json();
-                  const prof = pData.profile || pData;
-                  if (prof && prof.subscription_status) {
-                    setProfile(prev => ({ ...prev, ...prof, subscriptionStatus: prof.subscription_status }));
+              let attempts = 0;
+              const pollProfile = async () => {
+                attempts++;
+                try {
+                  const pRes = await fetch(`/api/meals?userId=${userId}`);
+                  if (pRes.ok) {
+                    const pData = await pRes.json();
+                    if (pData.profile?.subscription_status === 'premium') {
+                      setProfile(pData.profile);
+                      alert('✅ Premium активирован!');
+                      return;
+                    }
                   }
+                } catch (e) {}
+                if (attempts < 10) {
+                  setTimeout(pollProfile, 2000);
                 }
-              } catch (e) {}
-              alert('✅ Premium активирован!');
+              };
+              setTimeout(pollProfile, 2000);
             }
           });
         } else {
