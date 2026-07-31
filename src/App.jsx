@@ -223,7 +223,7 @@ function App() {
 
   const searchParams = new URLSearchParams(window.location.search);
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  const userId = tgUser?.id || searchParams.get("tgUserId") || "12345";
+  const userId = tgUser?.id || searchParams.get("tgUserId") || null;
 
   // Жесткая изоляция кэша: удаляем данные, если зашел другой пользователь
   if (userId) {
@@ -495,6 +495,7 @@ function App() {
       }
     } catch (err) {
       console.error("Failed to save profile changes:", err);
+      alert(lang === "ru" ? "Не удалось сохранить изменения профиля. Попробуйте ещё раз." : "Failed to save profile changes. Please try again.");
     } finally {
       setIsSavingProfile(false);
     }
@@ -594,7 +595,7 @@ function App() {
   const [referralStats, setReferralStats] = useState(null);
 
   useEffect(() => {
-    if (!userId || userId === '12345') return;
+    if (!userId) return;
     const fetchStats = async () => {
       try {
         const res = await fetch(`/api/referral/stats?userId=${userId}`);
@@ -827,6 +828,7 @@ function App() {
             }
           } catch (err) {
             console.error("Failed to save state to API:", err);
+            alert("Не удалось сохранить данные. Попробуйте ещё раз.");
           }
           
           localStorage.setItem("gain-tracker-meals", JSON.stringify(meals));
