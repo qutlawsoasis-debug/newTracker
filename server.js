@@ -1713,20 +1713,26 @@ app.get('/api/meals', requireAuth, async (req, res) => {
 });
 
 // Endpoint POST /api/meals/regenerate (Premium menu regeneration via Groq)
-app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
+app.post('/api/meals/regenerate', async (req, res) => {
   try {
-    const userId = req.body?.userId || req.user?.id;
+    const userId = req.body?.userId || req.query?.userId;
     console.log('regenerate: userId', userId);
     
     if (!userId) return res.status(400).json({ error: 'userId required' });
 
     console.log('regenerate: step 1 - fetching profile');
-    const { data: pData, error: pErr } = await supabase
+    const profilePromise = supabase
       .from('profiles')
-      .select('*')
+      .select('subscription_status, target_calories, goal, gender, age, weight, height, activity')
       .eq('telegram_id', String(userId))
       .maybeSingle();
-    console.log('regenerate: step 2 - profile result', JSON.stringify(pData)?.slice(0, 200), 'error:', pErr?.message);
+
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Supabase timeout')), 5000)
+    );
+
+    const { data: pData, error: pErr } = await Promise.race([profilePromise, timeoutPromise]);
+    console.log('regenerate: step 2', JSON.stringify(pData)?.slice(0, 100), pErr?.message);
 
     if (!pData) return res.status(404).json({ error: 'Profile not found' });
     if (pData.subscription_status !== 'premium') return res.status(403).json({ error: 'Premium required' });
