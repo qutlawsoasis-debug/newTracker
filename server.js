@@ -1460,6 +1460,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
   try {
     const { regenerate } = req.query;
     const userId = req.user.id;
+    const today = new Date().toDateString();
 
   let profile = null;
   let weightHistory = [];
@@ -1547,8 +1548,6 @@ app.get('/api/meals', requireAuth, async (req, res) => {
   }
 
   const { targetCalories, aiAnalysisText } = profile;
-  const todayStr = new Date().toDateString();
-  const today = todayStr;
 
   const globalAnalytics = await getGlobalAnalytics(userId);
 
