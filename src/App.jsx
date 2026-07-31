@@ -530,6 +530,26 @@ function App() {
 
   const [isNewUser, setIsNewUser] = useState(false);
   const [referrerId, setReferrerId] = useState(null);
+  const [referralStats, setReferralStats] = useState(null);
+
+  useEffect(() => {
+    if (!userId || userId === '12345') return;
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(`/api/referral/stats?userId=${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setReferralStats(data);
+          if (data.points !== undefined) {
+            setPoints(data.points);
+          }
+        }
+      } catch (e) {}
+    };
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, [userId]);
 
   useEffect(() => {
     const checkStartParam = () => {
@@ -1794,6 +1814,7 @@ function App() {
               userId={userId}
               lang={lang}
               points={points}
+              referralStats={referralStats}
               onRedeemSuccess={(newExpiry) => {
                 setProfile(prev => ({
                   ...prev,

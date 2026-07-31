@@ -671,7 +671,7 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
   let points = 0;
   let totalInvited = 0;
   let totalConverted = 0;
-  let invitedUsers = [];
+  let invitedBy = null;
 
   if (supabase) {
     try {
@@ -697,6 +697,15 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
           converted: r.converted
         }));
       }
+
+      const { data: invData } = await supabase
+        .from('referrals')
+        .select('referrer_id')
+        .eq('invitee_id', userId.toString())
+        .maybeSingle();
+      if (invData) {
+        invitedBy = invData.referrer_id;
+      }
     } catch (err) {
       logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
       console.error("Failed to query referral stats:", err);
@@ -709,7 +718,8 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
     total_invited: totalInvited,
     total_converted: totalConverted,
     next_reward_at: 500,
-    invited_users: invitedUsers
+    invited_users: invitedUsers,
+    invited_by: invitedBy
   });
 });
 

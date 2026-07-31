@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Gift, Copy, Check, Users, Sparkles, Share2 } from "lucide-react";
 
-export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeemSuccess }) {
+export default function ReferralCard({ userId, lang = "ru", points = 0, referralStats, onRedeemSuccess }) {
   const [copied, setCopied] = useState(false);
   const [isRedeeming, setIsRedeeming] = useState(false);
-  const [stats, setStats] = useState(null);
+  const [internalStats, setInternalStats] = useState(null);
 
   const isRu = lang === "ru";
   const refLink = `https://t.me/TrackerCPFC_bot?start=ref_${userId}`;
@@ -14,15 +14,17 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeem
     fetch(`/api/referral/stats?userId=${userId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data) setStats(data);
+        if (data) setInternalStats(data);
       })
       .catch(() => {});
   }, [userId, points]);
 
-  const currentPoints = stats?.points !== undefined ? stats.points : points;
-  const totalInvited = stats?.total_invited || 0;
-  const totalConverted = stats?.total_converted || 0;
-  const invitedUsers = stats?.invited_users || [];
+  const activeStats = referralStats || internalStats;
+  const currentPoints = activeStats?.points !== undefined ? activeStats.points : points;
+  const totalInvited = activeStats?.total_invited || 0;
+  const totalConverted = activeStats?.total_converted || 0;
+  const invitedUsers = activeStats?.invited_users || [];
+  const invitedBy = activeStats?.invited_by;
   const progressPercent = Math.min(100, Math.round((currentPoints / 500) * 100));
 
   const handleCopy = () => {
@@ -88,6 +90,18 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, onRedeem
           <span className="text-xs font-black text-amber-700">{currentPoints} <span className="text-[10px] font-semibold text-amber-600">баллов</span></span>
         </div>
       </div>
+
+      {/* Inviter Info Banner if invited_by exists */}
+      {invitedBy && (
+        <div className="bg-amber-50/80 border border-amber-200/70 rounded-xl p-3 flex items-start space-x-2.5">
+          <Gift className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-xs font-medium text-amber-900 leading-snug">
+            {isRu
+              ? "Ты пришёл по приглашению друга. Когда купишь Premium — он получит +200 баллов 🎁"
+              : "Du bist über die Einladung eines Freundes gekommen. При покупке Premium — er bekommt +200 Punkte 🎁"}
+          </p>
+        </div>
+      )}
 
       {/* Progress Bar to 500 pts */}
       <div className="space-y-1.5 pt-1">
