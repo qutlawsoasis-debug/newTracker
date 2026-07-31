@@ -518,9 +518,17 @@ function App() {
         if (window.Telegram?.WebApp?.openInvoice) {
           window.Telegram.WebApp.openInvoice(data.invoiceLink, async (status) => {
             if (status === 'paid') {
-              console.log("Payment successful!");
               await new Promise(resolve => setTimeout(resolve, 5000));
-              await fetchState();
+              try {
+                const pRes = await fetch(`/api/profile/${userId}`);
+                if (pRes.ok) {
+                  const pData = await pRes.json();
+                  const prof = pData.profile || pData;
+                  if (prof && prof.subscription_status) {
+                    setProfile(prev => ({ ...prev, ...prof, subscriptionStatus: prof.subscription_status }));
+                  }
+                }
+              } catch (e) {}
               alert('✅ Premium активирован!');
             }
           });
