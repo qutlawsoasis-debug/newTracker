@@ -2658,4 +2658,50 @@ if (!process.env.DISABLE_BOT) {
       console.error("[Cron Morning Reminder Error]:", err);
     }
   });
+
+  // Evening reminder cron job from Appy at 19:00 UTC (21:00 Germany)
+  cron.schedule("0 19 * * *", async () => {
+    if (!supabase) return;
+    console.log('[Cron] Running Appy evening reminder cron job...');
+    try {
+      let { data: users } = await supabase
+        .from("profiles")
+        .select("telegram_id")
+        .not("telegram_id", "is", null);
+
+      if (!users || users.length === 0) {
+        const { data: altUsers } = await supabase
+          .from("users")
+          .select("telegram_id")
+          .not("telegram_id", "is", null);
+        users = altUsers || [];
+      }
+
+      if (!users || users.length === 0) return;
+
+      const messages = [
+        "🌙 Как прошёл день? Не забудь отметить что съел в приложении 📊",
+        "😤 Эй! Ты выполнил план питания сегодня? Загляни в Эппи и отметь приёмы пищи",
+        "🍏 Вечер добрый! Проверь свой прогресс за день — осталось ли что-то несъеденное? 💪"
+      ];
+
+      for (const u of users) {
+        const telegram_id = u.telegram_id;
+        if (!telegram_id) continue;
+        const text = messages[Math.floor(Math.random() * messages.length)];
+        try {
+          await bot.api.sendMessage(telegram_id, text);
+          await supabase.from("app_logs").insert({
+            user_id: telegram_id.toString(),
+            endpoint: "/cron/evening-reminder",
+            method: "CRON"
+          });
+        } catch (e) {
+          // Skip if user blocked bot or failed to send
+        }
+      }
+    } catch (err) {
+      console.error("[Cron Evening Reminder Error]:", err);
+    }
+  });
 }
