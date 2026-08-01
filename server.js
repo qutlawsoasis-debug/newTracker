@@ -2125,6 +2125,14 @@ app.listen(PORT, () => {
 });
 
 // Telegram Bot Setup
+async function sendWithTyping(ctx, text, options) {
+  await ctx.replyWithChatAction("typing");
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const delay = Math.min(text.length * 20, 3000);
+  await sleep(delay);
+  return await ctx.reply(text, options);
+}
+
 bot.use(async (ctx, next) => {
   const fromId = ctx.from?.id;
   if (!fromId) return;
@@ -2137,7 +2145,7 @@ bot.command('start', async (ctx) => {
   const baseUrl = process.env.WEBAPP_URL || `http://localhost:${PORT}`; 
   const webAppUrl = baseUrl.includes('?') ? `${baseUrl}&v=${DATA_VERSION}&tgUserId=${ctx.from.id}${startParamQuery}` : `${baseUrl}?v=${DATA_VERSION}&tgUserId=${ctx.from.id}${startParamQuery}`; 
   const startText = "Привет! Я Эппи — твой персональный наставник по питанию, готов к работе. Нажми кнопку ниже, чтобы открыть приложение, или напиши мне свой возраст, рост и вес через пробел.";
-  await ctx.reply(startText, {
+  await sendWithTyping(ctx, startText, {
     reply_markup: {
       keyboard: [
         [{ text: "Эппи", web_app: { url: webAppUrl } }]
@@ -2150,7 +2158,7 @@ bot.command('start', async (ctx) => {
 bot.command('ref', async (ctx) => {
   const userId = ctx.from.id;
   const link = `https://t.me/TrackerCPFC_bot?start=ref_${userId}`;
-  await ctx.reply(
+  await sendWithTyping(ctx, 
     `🎯 Твоя реферальная ссылка:\n${link}\n\n` +
     `За каждого друга который прошёл регистрацию: +50 баллов\n` +
     `За каждого друга который купил Premium: +200 баллов\n` +
@@ -2169,7 +2177,7 @@ bot.on('message:text', async (ctx) => {
     await ctx.replyWithChatAction("typing");
 
     if (!groqApiKey) {
-      return ctx.reply("AI-функции временно недоступны (не настроен GROQ_API_KEY).");
+      return sendWithTyping(ctx, "AI-функции временно недоступны (не настроен GROQ_API_KEY).");
     }
 
     const systemInstruction = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Твоя задача — отвечать на вопросы пользователя и помогать по питанию.";
@@ -2185,9 +2193,10 @@ bot.on('message:text', async (ctx) => {
       stream: true,
     });
 
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     let fullText = "";
     let messageId = null;
-    let lastEditTime = Date.now();
+    let lastLength = 0;
 
     for await (const chunk of stream) {
       const delta = chunk.choices[0]?.delta?.content || "";
@@ -2196,26 +2205,27 @@ bot.on('message:text', async (ctx) => {
       if (!messageId && fullText.trim()) {
         const sent = await ctx.reply(fullText);
         messageId = sent.message_id;
-        lastEditTime = Date.now();
-      } else if (messageId && (Date.now() - lastEditTime > 400 || fullText.length % 40 === 0)) {
+        lastLength = fullText.length;
+      } else if (messageId && (fullText.length - lastLength >= 15)) {
         try {
           await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
-          lastEditTime = Date.now();
+          lastLength = fullText.length;
+          await sleep(200);
         } catch (e) {}
       }
     }
 
-    if (messageId && fullText) {
+    if (messageId && fullText && fullText.length !== lastLength) {
       try {
         await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
       } catch (e) {}
     } else if (!messageId && fullText) {
-      await ctx.reply(fullText);
+      await sendWithTyping(ctx, fullText);
     }
   } catch (err) {
     console.error("Telegram bot AI streaming response error:", err);
     try {
-      await ctx.reply("Произошла ошибка при генерации ответа. Попробуй ещё раз.");
+      await sendWithTyping(ctx, "Произошла ошибка при генерации ответа. Попробуй ещё раз.");
     } catch (e) {}
   }
 });
@@ -2225,7 +2235,7 @@ bot.on('message:location', async (ctx) => {
   const { latitude, longitude } = ctx.message.location;
 
   console.log(`[ReverseGeo] Grammy location received for user ${userId}: lat=${latitude}, lon=${longitude}`);
-  await ctx.reply("Секунду, определяем твою точную геопозицию...");
+  await sendWithTyping(ctx, "Секунду, определяем твою точную геопозицию...");
 
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=ru`;
@@ -2272,7 +2282,7 @@ bot.on('message:location', async (ctx) => {
       const cacheBustUrl = webAppUrl.includes('?') ? `${webAppUrl}&v=${DATA_VERSION}&tgUserId=${ctx.from.id}` : `${webAppUrl}?v=${DATA_VERSION}&tgUserId=${ctx.from.id}`;
 
       // Reply with keyboard reset to normal WebApp link
-      await ctx.reply(`Успешно! Твой регион обновлен: ${city}, ${regionName}, ${country}. Можешь снова открыть Эппи.`, {
+      await sendWithTyping(ctx, `Успешно! Твой регион обновлен: ${city}, ${regionName}, ${country}. Можешь снова открыть Эппи.`, {
         reply_markup: {
           keyboard: [
             [{ text: "Эппи", web_app: { url: cacheBustUrl } }]
@@ -2286,7 +2296,7 @@ bot.on('message:location', async (ctx) => {
   } catch (err) {
   logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
     console.error("[ReverseGeo] Grammy location resolution failed:", err);
-    await ctx.reply(`Произошла ошибка при обработке геопозиции: ${err.message}`);
+    await sendWithTyping(ctx, `Произошла ошибка при обработке геопозиции: ${err.message}`);
   }
 });
 
