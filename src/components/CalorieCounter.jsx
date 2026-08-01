@@ -130,10 +130,9 @@ export default function CalorieCounter({
           </div>
         )}
 
-        {streak >= 2 && (
+        {streak >= 0 && (
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-600 rounded-full text-xs font-bold">
-            <span>🔥</span>
-            <span>{streak} {translations?.dayProgress === "Прогресс за день" ? "дней подряд" : "Tage in Folge"}</span>
+            <span>{streak === 0 ? (translations?.dayProgress === "Прогресс за день" ? "🔥 Начни серию!" : "🔥 Serie starten!") : `🔥 ${streak} ${translations?.dayProgress === "Прогресс за день" ? "дней подряд" : "Tage in Folge"}`}</span>
           </div>
         )}
       </div>
