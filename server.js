@@ -2127,6 +2127,13 @@ app.listen(PORT, () => {
 // Telegram Bot Setup
 async function sendWithTyping(ctx, text, options) {
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  if (text.length > 200) {
+    await ctx.replyWithChatAction("typing");
+    await sleep(1500);
+    return await ctx.reply(text, { parse_mode: "HTML", ...(options || {}) });
+  }
+
   await ctx.replyWithChatAction("typing");
   await sleep(800);
   
@@ -2231,10 +2238,16 @@ bot.on('message:text', async (ctx) => {
         lastLength = fullText.length;
       } else if (messageId && (fullText.length - lastLength >= 15)) {
         try {
-          await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
+          await ctx.api.editMessageText(ctx.chat.id, messageId, fullText, { parse_mode: "HTML" });
           lastLength = fullText.length;
           await sleep(200);
-        } catch (e) {}
+        } catch (e) {
+          try {
+            await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
+            lastLength = fullText.length;
+            await sleep(200);
+          } catch (e2) {}
+        }
       }
     }
 
