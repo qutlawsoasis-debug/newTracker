@@ -36,7 +36,7 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, referral
   const handleShare = () => {
     const refParam = `ref_${userId}`;
     const appLink = `https://t.me/TrackerCPFC_bot?start=${refParam}`;
-    const shareText = encodeURIComponent('Набирай массу вместе со мной в GainTracker! 💪');
+    const shareText = encodeURIComponent('Набирай массу вместе со мной в Эппи! 💪');
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(appLink)}&text=${shareText}`;
     if (window.Telegram?.WebApp?.openTelegramLink) {
       window.Telegram.WebApp.openTelegramLink(shareUrl);

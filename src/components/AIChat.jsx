@@ -32,8 +32,8 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
       setMessages([{
         sender: "npc",
         text: lang === "ru" 
-          ? "Привет, я твой ИИ-наставник по питанию. Напиши, что ты съел, или отправь фото еды/чека!" 
-          : "Hi, I'm your AI nutrition coach. Tell me what you ate or send a photo of your food/receipt!"
+          ? "Привет, я Эппи — твой наставник по питанию. Напиши, что ты съел, или отправь фото еды/чека!" 
+          : "Hi, I'm Appy — your nutrition coach. Tell me what you ate or send a photo of your food/receipt!"
       }]);
     }
     scrollToBottom();
@@ -208,7 +208,7 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
             </div>
             <div>
               <h3 className="text-base font-bold text-zinc-900 leading-snug">
-                {lang === "ru" ? "ИИ-Наставник по питанию" : "AI Nutrition Coach"}
+                {lang === "ru" ? "Эппи" : "Appy"}
               </h3>
               <p className="text-xs text-zinc-400">
                 {isPremium

@@ -48,3 +48,37 @@ Deliver an E2E Audit Report consolidating findings from all 4 agents categorized
 ✅ Работает корректно
 ⚠️ Работает с замечаниями
 ❌ Сломано
+
+## Follow-up — 2026-07-31T20:36:24Z
+
+Conduct a comprehensive multi-agent end-to-end testing and audit of GainTracker on Vercel and Telegram Bot.
+
+Working directory: C:\Users\magne\Documents\GitHub\newTracker
+Integrity mode: development
+Base URL: https://new-tracker-orpin.vercel.app
+Telegram Bot: @TrackerCPFC_bot
+Test User ID: 8319427555
+
+## Requirements
+
+### R1. Comprehensive E2E Testing Suite (12 Core Flows)
+Audit and verify the following 12 key user flows using live HTTP requests, Puppeteer browser interaction, and API assertions:
+1. Онбординг — новый юзер, ввод параметров, расчёт КБЖУ
+2. Главный экран — отображение прогресса, приёмы пищи, прогресс-бар КБЖУ
+3. Генерация меню — AI генерация рациона, отображение 4 приёмов пищи
+4. Реролл блюда — локальная и готовая замена блюда
+5. Отметка "Съедено" — обновления прогресс-бара при переключении галочек
+6. AI чат Free — лимит 3 сообщений в день, блокировка и пейволл на 4-м сообщении
+7. Premium пейволл — открытие модального окна и активность кнопки оплаты
+8. Реферальная система — генерация реферальной ссылки и учёт баллов
+9. График веса — сохранение логирования веса и обновление графика
+10. Календарь — история питания за прошлые даты
+11. Смена языка DE/RU — переключение всех текстов UI
+12. API эндпоинты — корректность ответов всех /api/* без 500 ошибок
+
+## Acceptance Criteria
+
+### E2E Status Table
+- [ ] Detailed status for each of the 12 flows: ✅ работает / ❌ сломано / ⚠️ частично
+- [ ] Precise failure report including HTTP status codes, error messages, and file locations for any broken functionality
+

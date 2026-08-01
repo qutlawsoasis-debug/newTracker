@@ -916,7 +916,7 @@ app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
     console.log("Creating invoice link for userId:", userId);
 
     const invoiceLink = await bot.api.raw.createInvoiceLink({
-      title: "GainTracker Premium",
+      title: "Эппи Premium",
       description: "30 дней Premium: AI чат без ограничений, замена блюд, обновление меню через AI",
       payload: JSON.stringify({ userId: userId.toString(), type: "premium_30d" }),
       provider_token: "",
@@ -1276,7 +1276,7 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
   }
 
   try {
-    const systemInstruction = "Ты — саркастичный, но полезный ИИ-наставник по фитнесу и питанию. Твоя задача — отвечать на вопросы пользователя и анализировать еду, если он присылает фото или описывает ее. Отвечай всегда строго в формате JSON: { \"text\": \"твой ответ пользователю\", \"food_log\": null }. Если пользователь прислал фото еды или четко описал прием пищи с весом/объемом, и это можно залогировать, то вместо null верни объект: { \"food_name\": \"название\", \"calories\": 100, \"protein\": 10, \"fat\": 5, \"carbs\": 20 }. Не используй markdown-разметку для JSON, верни чистый JSON.";
+    const systemInstruction = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Твоя задача — отвечать на вопросы пользователя и анализировать еду, если он присылает фото или описывает ее. Отвечай всегда строго в формате JSON: { \"text\": \"твой ответ пользователю\", \"food_log\": null }. Если пользователь прислал фото еды или четко описал прием пищи с весом/объемом, и это можно залогировать, то вместо null верни объект: { \"food_name\": \"название\", \"calories\": 100, \"protein\": 10, \"fat\": 5, \"carbs\": 20 }. Не используй markdown-разметку для JSON, верни чистый JSON.";
 
     let textPrompt = "";
     if (history && Array.isArray(history)) {
@@ -2136,11 +2136,11 @@ bot.command('start', async (ctx) => {
   const startParamQuery = startPayload ? `&startapp=${encodeURIComponent(startPayload)}` : '';
   const baseUrl = process.env.WEBAPP_URL || `http://localhost:${PORT}`; 
   const webAppUrl = baseUrl.includes('?') ? `${baseUrl}&v=${DATA_VERSION}&tgUserId=${ctx.from.id}${startParamQuery}` : `${baseUrl}?v=${DATA_VERSION}&tgUserId=${ctx.from.id}${startParamQuery}`; 
-  const startText = "Привет! Я твой персональный фитнес-трекер питания GainTracker готов к работе. Нажми кнопку ниже, чтобы открыть приложение, или напиши мне свой возраст, рост и вес через пробел.";
+  const startText = "Привет! Я Эппи — твой персональный наставник по питанию, готов к работе. Нажми кнопку ниже, чтобы открыть приложение, или напиши мне свой возраст, рост и вес через пробел.";
   await ctx.reply(startText, {
     reply_markup: {
       keyboard: [
-        [{ text: "GainTracker", web_app: { url: webAppUrl } }]
+        [{ text: "Эппи", web_app: { url: webAppUrl } }]
       ],
       resize_keyboard: true
     }
@@ -2156,7 +2156,7 @@ bot.command('ref', async (ctx) => {
     `За каждого друга который купил Premium: +200 баллов\n` +
     `500 баллов = 1 месяц Premium бесплатно!`,
     { reply_markup: { inline_keyboard: [[
-      { text: '📤 Поделиться', url: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Попробуй GainTracker — трекер питания для набора веса!')}` }
+      { text: '📤 Поделиться', url: `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Попробуй Эппи — трекер питания для набора веса!')}` }
     ]]}}
   );
 });
@@ -2213,10 +2213,10 @@ bot.on('message:location', async (ctx) => {
       const cacheBustUrl = webAppUrl.includes('?') ? `${webAppUrl}&v=${DATA_VERSION}&tgUserId=${ctx.from.id}` : `${webAppUrl}?v=${DATA_VERSION}&tgUserId=${ctx.from.id}`;
 
       // Reply with keyboard reset to normal WebApp link
-      await ctx.reply(`Успешно! Твой регион обновлен: ${city}, ${regionName}, ${country}. Можешь снова открыть Gain Tracker.`, {
+      await ctx.reply(`Успешно! Твой регион обновлен: ${city}, ${regionName}, ${country}. Можешь снова открыть Эппи.`, {
         reply_markup: {
           keyboard: [
-            [{ text: "GainTracker", web_app: { url: cacheBustUrl } }]
+            [{ text: "Эппи", web_app: { url: cacheBustUrl } }]
           ],
           resize_keyboard: true
         }
@@ -2273,7 +2273,7 @@ const notifyUpdate = async () => {
     const points = await generateChangelog(DATA_VERSION, description);
     const cleanPoints = points.map(pt => pt.replace(/[`_*[\]()]/g, ''));
     const changelogList = cleanPoints.map(pt => `• ${pt}`).join('\n');
-    const updateText = `**GainTracker обновлен до версии ${DATA_VERSION}!**\n\n**Что сделано в этом обновлении:**\n${changelogList}\n\nНажмите кнопку ниже, чтобы открыть обновленное приложение.`;
+    const updateText = `**Эппи обновлен до версии ${DATA_VERSION}!**\n\n**Что сделано в этом обновлении:**\n${changelogList}\n\nНажмите кнопку ниже, чтобы открыть обновленное приложение.`;
 
     const baseUrl = process.env.WEBAPP_URL || `http://localhost:${PORT}`; 
     const webAppUrl = baseUrl.includes('?') ? `${baseUrl}&v=${DATA_VERSION}` : `${baseUrl}?v=${DATA_VERSION}`; 
@@ -2321,7 +2321,7 @@ const notifyUpdate = async () => {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: "Открыть GainTracker", web_app: { url: webAppUrl } }]
+              [{ text: "Открыть Эппи", web_app: { url: webAppUrl } }]
             ]
           }
         });

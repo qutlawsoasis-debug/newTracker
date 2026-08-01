@@ -47,9 +47,9 @@ export default function OnboardingScreen({ onComplete, lang = "ru" }) {
         <div className="flex items-center justify-between py-2 mb-6">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-zinc-950 text-white font-bold flex items-center justify-center text-xs">
-              GT
+              E
             </div>
-            <span className="font-bold text-sm tracking-tight text-zinc-950">GainTracker</span>
+            <span className="font-bold text-sm tracking-tight text-zinc-950">Эппи</span>
           </div>
           <span className="text-xs font-semibold text-zinc-400 bg-zinc-100 px-2.5 py-1 rounded-full">
             {step} / 3

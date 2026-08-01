@@ -1414,7 +1414,7 @@ function App() {
         <div className="max-w-lg mx-auto px-4 h-12 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[14px] font-bold text-[#1D1D1F] tracking-tight leading-none">
-              GainTracker
+              Эппи
             </span>
             <span className="text-[10px] font-medium text-zinc-400 mt-1 capitalize">
               {dateStr}
@@ -2248,7 +2248,7 @@ function App() {
           <div className="w-full max-w-sm bg-white rounded-2xl p-5 border border-zinc-200 shadow-2xl space-y-4">
             <div className="flex items-center space-x-2 text-amber-500">
               <span className="text-xl">⭐</span>
-              <h3 className="text-sm font-bold text-zinc-900">GainTracker Premium</h3>
+              <h3 className="text-sm font-bold text-zinc-900">Эппи Premium</h3>
             </div>
             <p className="text-xs text-zinc-600 leading-relaxed font-medium">
               {upgradeModal.message || (lang === "ru" 
