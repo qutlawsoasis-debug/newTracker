@@ -6,6 +6,7 @@ const { Bot } = require('grammy');
 const Groq = require('groq-sdk');
 const { createClient } = require('@supabase/supabase-js');
 const ws = require('ws');
+const cron = require('node-cron');
 const mealsData = require('./src/data/meals.js');
 
 // Initialize Supabase Client
@@ -2611,4 +2612,50 @@ const checkAndSendNotifications = async () => {
 if (!process.env.DISABLE_BOT) {
   setInterval(checkAndSendNotifications, 60000);
   console.log('Notification Scheduler started');
+
+  // Morning reminder cron job from Appy at 08:00 AM
+  cron.schedule("0 8 * * *", async () => {
+    if (!supabase) return;
+    console.log('[Cron] Running Appy morning reminder cron job...');
+    try {
+      let { data: users } = await supabase
+        .from("profiles")
+        .select("telegram_id")
+        .not("telegram_id", "is", null);
+
+      if (!users || users.length === 0) {
+        const { data: altUsers } = await supabase
+          .from("users")
+          .select("telegram_id")
+          .not("telegram_id", "is", null);
+        users = altUsers || [];
+      }
+
+      if (!users || users.length === 0) return;
+
+      const messages = [
+        "🍏 Доброе утро! Новый день — новые калории. Открывай план и начинай питаться правильно 💪",
+        "☀️ Эй, просыпайся! Я уже составил твой рацион на сегодня. Не забудь позавтракать 😤",
+        "🌅 Утро! Твоё тело ждёт топлива. Загляни в план питания и начни день правильно 🔥"
+      ];
+
+      for (const u of users) {
+        const telegram_id = u.telegram_id;
+        if (!telegram_id) continue;
+        const text = messages[Math.floor(Math.random() * messages.length)];
+        try {
+          await bot.api.sendMessage(telegram_id, text);
+          await supabase.from("app_logs").insert({
+            user_id: telegram_id.toString(),
+            endpoint: "/cron/morning-reminder",
+            method: "CRON"
+          });
+        } catch (e) {
+          // Skip if user blocked bot or failed to send
+        }
+      }
+    } catch (err) {
+      console.error("[Cron Morning Reminder Error]:", err);
+    }
+  });
 }
