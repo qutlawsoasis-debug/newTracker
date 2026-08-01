@@ -2128,9 +2128,9 @@ app.listen(PORT, () => {
 async function sendWithTyping(ctx, text, options) {
   await ctx.replyWithChatAction("typing");
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-  const delay = Math.min(text.length * 20, 3000);
+  const delay = Math.max(Math.min(text.length * 30, 4000), 1500);
   await sleep(delay);
-  return await ctx.reply(text, options);
+  await ctx.reply(text, options);
 }
 
 bot.use(async (ctx, next) => {
