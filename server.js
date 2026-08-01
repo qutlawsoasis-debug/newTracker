@@ -2613,8 +2613,8 @@ if (!process.env.DISABLE_BOT) {
   setInterval(checkAndSendNotifications, 60000);
   console.log('Notification Scheduler started');
 
-  // Morning reminder cron job from Appy at 08:00 AM
-  cron.schedule("0 8 * * *", async () => {
+  // Morning reminder cron job from Appy at 06:00 UTC (08:00 Germany)
+  cron.schedule("0 6 * * *", async () => {
     if (!supabase) return;
     console.log('[Cron] Running Appy morning reminder cron job...');
     try {
