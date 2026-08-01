@@ -6,7 +6,6 @@ const { Bot } = require('grammy');
 const Groq = require('groq-sdk');
 const { createClient } = require('@supabase/supabase-js');
 const ws = require('ws');
-const cron = require('node-cron');
 const mealsData = require('./src/data/meals.js');
 
 // Initialize Supabase Client
@@ -2612,96 +2611,111 @@ const checkAndSendNotifications = async () => {
 if (!process.env.DISABLE_BOT) {
   setInterval(checkAndSendNotifications, 60000);
   console.log('Notification Scheduler started');
-
-  // Morning reminder cron job from Appy at 06:00 UTC (08:00 Germany)
-  cron.schedule("0 6 * * *", async () => {
-    if (!supabase) return;
-    console.log('[Cron] Running Appy morning reminder cron job...');
-    try {
-      let { data: users } = await supabase
-        .from("profiles")
-        .select("telegram_id")
-        .not("telegram_id", "is", null);
-
-      if (!users || users.length === 0) {
-        const { data: altUsers } = await supabase
-          .from("users")
-          .select("telegram_id")
-          .not("telegram_id", "is", null);
-        users = altUsers || [];
-      }
-
-      if (!users || users.length === 0) return;
-
-      const messages = [
-        "🍏 Доброе утро! Новый день — новые калории. Открывай план и начинай питаться правильно 💪",
-        "☀️ Эй, просыпайся! Я уже составил твой рацион на сегодня. Не забудь позавтракать 😤",
-        "🌅 Утро! Твоё тело ждёт топлива. Загляни в план питания и начни день правильно 🔥"
-      ];
-
-      for (const u of users) {
-        const telegram_id = u.telegram_id;
-        if (!telegram_id) continue;
-        const text = messages[Math.floor(Math.random() * messages.length)];
-        try {
-          await bot.api.sendMessage(telegram_id, text);
-          await supabase.from("app_logs").insert({
-            user_id: telegram_id.toString(),
-            endpoint: "/cron/morning-reminder",
-            method: "CRON"
-          });
-        } catch (e) {
-          // Skip if user blocked bot or failed to send
-        }
-      }
-    } catch (err) {
-      console.error("[Cron Morning Reminder Error]:", err);
-    }
-  });
-
-  // Evening reminder cron job from Appy at 19:00 UTC (21:00 Germany)
-  cron.schedule("0 19 * * *", async () => {
-    if (!supabase) return;
-    console.log('[Cron] Running Appy evening reminder cron job...');
-    try {
-      let { data: users } = await supabase
-        .from("profiles")
-        .select("telegram_id")
-        .not("telegram_id", "is", null);
-
-      if (!users || users.length === 0) {
-        const { data: altUsers } = await supabase
-          .from("users")
-          .select("telegram_id")
-          .not("telegram_id", "is", null);
-        users = altUsers || [];
-      }
-
-      if (!users || users.length === 0) return;
-
-      const messages = [
-        "🌙 Как прошёл день? Не забудь отметить что съел в приложении 📊",
-        "😤 Эй! Ты выполнил план питания сегодня? Загляни в Эппи и отметь приёмы пищи",
-        "🍏 Вечер добрый! Проверь свой прогресс за день — осталось ли что-то несъеденное? 💪"
-      ];
-
-      for (const u of users) {
-        const telegram_id = u.telegram_id;
-        if (!telegram_id) continue;
-        const text = messages[Math.floor(Math.random() * messages.length)];
-        try {
-          await bot.api.sendMessage(telegram_id, text);
-          await supabase.from("app_logs").insert({
-            user_id: telegram_id.toString(),
-            endpoint: "/cron/evening-reminder",
-            method: "CRON"
-          });
-        } catch (e) {
-          // Skip if user blocked bot or failed to send
-        }
-      }
-    } catch (err) {
-      console.error("[Cron Evening Reminder Error]:", err);
-    }
-  });
 }
+
+// Vercel Cron Endpoints
+app.get('/api/cron/morning', async (req, res) => {
+  if (req.headers["x-vercel-cron"] !== "1" && process.env.NODE_ENV === "production") {
+    return res.status(401).end();
+  }
+  if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
+
+  console.log('[Vercel Cron Morning] Executing morning reminder...');
+  try {
+    let { data: users } = await supabase
+      .from("profiles")
+      .select("telegram_id")
+      .not("telegram_id", "is", null);
+
+    if (!users || users.length === 0) {
+      const { data: altUsers } = await supabase
+        .from("users")
+        .select("telegram_id")
+        .not("telegram_id", "is", null);
+      users = altUsers || [];
+    }
+
+    if (!users || users.length === 0) {
+      return res.json({ success: true, sentCount: 0 });
+    }
+
+    const messages = [
+      "🍏 Доброе утро! Новый день — новые калории. Открывай план и начинай питаться правильно 💪",
+      "☀️ Эй, просыпайся! Я уже составил твой рацион на сегодня. Не забудь позавтракать 😤",
+      "🌅 Утро! Твоё тело ждёт топлива. Загляни в план питания и начни день правильно 🔥"
+    ];
+
+    let sentCount = 0;
+    for (const u of users) {
+      const telegram_id = u.telegram_id;
+      if (!telegram_id) continue;
+      const text = messages[Math.floor(Math.random() * messages.length)];
+      try {
+        await bot.api.sendMessage(telegram_id, text);
+        await supabase.from("app_logs").insert({
+          user_id: telegram_id.toString(),
+          endpoint: "/cron/morning-reminder",
+          method: "CRON"
+        });
+        sentCount++;
+      } catch (e) {}
+    }
+    return res.json({ success: true, sentCount });
+  } catch (err) {
+    console.error("[Cron Morning Error]:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/cron/evening', async (req, res) => {
+  if (req.headers["x-vercel-cron"] !== "1" && process.env.NODE_ENV === "production") {
+    return res.status(401).end();
+  }
+  if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
+
+  console.log('[Vercel Cron Evening] Executing evening reminder...');
+  try {
+    let { data: users } = await supabase
+      .from("profiles")
+      .select("telegram_id")
+      .not("telegram_id", "is", null);
+
+    if (!users || users.length === 0) {
+      const { data: altUsers } = await supabase
+        .from("users")
+        .select("telegram_id")
+        .not("telegram_id", "is", null);
+      users = altUsers || [];
+    }
+
+    if (!users || users.length === 0) {
+      return res.json({ success: true, sentCount: 0 });
+    }
+
+    const messages = [
+      "🌙 Как прошёл день? Не забудь отметить что съел в приложении 📊",
+      "😤 Эй! Ты выполнил план питания сегодня? Загляни в Эппи и отметь приёмы пищи",
+      "🍏 Вечер добрый! Проверь свой прогресс за день — осталось ли что-то несъеденное? 💪"
+    ];
+
+    let sentCount = 0;
+    for (const u of users) {
+      const telegram_id = u.telegram_id;
+      if (!telegram_id) continue;
+      const text = messages[Math.floor(Math.random() * messages.length)];
+      try {
+        await bot.api.sendMessage(telegram_id, text);
+        await supabase.from("app_logs").insert({
+          user_id: telegram_id.toString(),
+          endpoint: "/cron/evening-reminder",
+          method: "CRON"
+        });
+        sentCount++;
+      } catch (e) {}
+    }
+    return res.json({ success: true, sentCount });
+  } catch (err) {
+    console.error("[Cron Evening Error]:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});

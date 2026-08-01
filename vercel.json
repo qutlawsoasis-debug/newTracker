@@ -4,6 +4,16 @@
     { "src": "server.js", "use": "@vercel/node" },
     { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
   ],
+  "crons": [
+    {
+      "path": "/api/cron/morning",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/evening",
+      "schedule": "0 19 * * *"
+    }
+  ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/server.js" },
     { "src": "/(.*)", "dest": "/dist/$1" }
