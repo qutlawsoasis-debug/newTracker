@@ -2174,7 +2174,7 @@ bot.command('start', async (ctx) => {
   const startParamQuery = startPayload ? `&startapp=${encodeURIComponent(startPayload)}` : '';
   const baseUrl = process.env.WEBAPP_URL || `http://localhost:${PORT}`; 
   const webAppUrl = baseUrl.includes('?') ? `${baseUrl}&v=${DATA_VERSION}&tgUserId=${ctx.from.id}${startParamQuery}` : `${baseUrl}?v=${DATA_VERSION}&tgUserId=${ctx.from.id}${startParamQuery}`; 
-  const startText = "Привет! Я Эппи — твой персональный наставник по питанию, готов к работе. Нажми кнопку ниже, чтобы открыть приложение, или напиши мне свой возраст, рост и вес через пробел.";
+  const startText = "Привет! Я Эппи 🍏 — твой наставник по питанию. Нажми кнопку ниже!";
   await sendWithTyping(ctx, startText, {
     reply_markup: {
       keyboard: [
@@ -2238,16 +2238,10 @@ bot.on('message:text', async (ctx) => {
         lastLength = fullText.length;
       } else if (messageId && (fullText.length - lastLength >= 15)) {
         try {
-          await ctx.api.editMessageText(ctx.chat.id, messageId, fullText, { parse_mode: "HTML" });
+          await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
           lastLength = fullText.length;
           await sleep(200);
-        } catch (e) {
-          try {
-            await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
-            lastLength = fullText.length;
-            await sleep(200);
-          } catch (e2) {}
-        }
+        } catch (e) {}
       }
     }
 
