@@ -2161,6 +2161,65 @@ bot.command('ref', async (ctx) => {
   );
 });
 
+bot.on('message:text', async (ctx) => {
+  const userText = ctx.message.text;
+  if (!userText || userText.startsWith('/')) return;
+
+  try {
+    await ctx.replyWithChatAction("typing");
+
+    if (!groqApiKey) {
+      return ctx.reply("AI-функции временно недоступны (не настроен GROQ_API_KEY).");
+    }
+
+    const systemInstruction = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Твоя задача — отвечать на вопросы пользователя и помогать по питанию.";
+
+    const messages = [
+      { role: "system", content: systemInstruction },
+      { role: "user", content: userText }
+    ];
+
+    const stream = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: messages,
+      stream: true,
+    });
+
+    let fullText = "";
+    let messageId = null;
+    let lastEditTime = Date.now();
+
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta?.content || "";
+      fullText += delta;
+
+      if (!messageId && fullText.trim()) {
+        const sent = await ctx.reply(fullText);
+        messageId = sent.message_id;
+        lastEditTime = Date.now();
+      } else if (messageId && (Date.now() - lastEditTime > 400 || fullText.length % 40 === 0)) {
+        try {
+          await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
+          lastEditTime = Date.now();
+        } catch (e) {}
+      }
+    }
+
+    if (messageId && fullText) {
+      try {
+        await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
+      } catch (e) {}
+    } else if (!messageId && fullText) {
+      await ctx.reply(fullText);
+    }
+  } catch (err) {
+    console.error("Telegram bot AI streaming response error:", err);
+    try {
+      await ctx.reply("Произошла ошибка при генерации ответа. Попробуй ещё раз.");
+    } catch (e) {}
+  }
+});
+
 bot.on('message:location', async (ctx) => {
   const userId = ctx.from.id;
   const { latitude, longitude } = ctx.message.location;
