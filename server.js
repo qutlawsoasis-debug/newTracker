@@ -2127,39 +2127,13 @@ app.listen(PORT, () => {
 // Telegram Bot Setup
 async function sendWithTyping(ctx, text, options) {
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-  if (text.length > 200) {
-    await ctx.replyWithChatAction("typing");
-    await sleep(1500);
-    return await ctx.reply(text, { parse_mode: "HTML", ...(options || {}) });
-  }
-
   await ctx.replyWithChatAction("typing");
-  await sleep(800);
-  
-  const sent = await ctx.reply("...");
-  const messageId = sent.message_id;
-  const chatId = ctx.chat.id;
-  
-  let current = "";
-  const words = text.split(" ");
-  
-  for (let i = 0; i < words.length; i++) {
-    current += (i === 0 ? "" : " ") + words[i];
-    const isLast = (i === words.length - 1);
-    if (i % 3 === 0 || isLast) {
-      try {
-        const finalOptions = isLast ? { parse_mode: "HTML", ...(options || {}) } : undefined;
-        await ctx.api.editMessageText(chatId, messageId, current, finalOptions);
-      } catch (e) {
-        if (isLast) {
-          try {
-            await ctx.api.editMessageText(chatId, messageId, current, options);
-          } catch (err) {}
-        }
-      }
-      await sleep(120);
-    }
+  await sleep(1500);
+  const finalOptions = { parse_mode: "HTML", ...(options || {}) };
+  try {
+    return await ctx.reply(text, finalOptions);
+  } catch (e) {
+    return await ctx.reply(text, options);
   }
 }
 
