@@ -2126,11 +2126,27 @@ app.listen(PORT, () => {
 
 // Telegram Bot Setup
 async function sendWithTyping(ctx, text, options) {
-  await ctx.replyWithChatAction("typing");
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-  const delay = Math.max(Math.min(text.length * 30, 4000), 1500);
-  await sleep(delay);
-  await ctx.reply(text, options);
+  await ctx.replyWithChatAction("typing");
+  await sleep(800);
+  
+  const sent = await ctx.reply("...");
+  const messageId = sent.message_id;
+  const chatId = ctx.chat.id;
+  
+  let current = "";
+  const words = text.split(" ");
+  
+  for (let i = 0; i < words.length; i++) {
+    current += (i === 0 ? "" : " ") + words[i];
+    const isLast = (i === words.length - 1);
+    if (i % 3 === 0 || isLast) {
+      try {
+        await ctx.api.editMessageText(chatId, messageId, current, isLast ? options : undefined);
+      } catch (e) {}
+      await sleep(120);
+    }
+  }
 }
 
 bot.use(async (ctx, next) => {
