@@ -1276,7 +1276,7 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
   }
 
   try {
-    const systemInstruction = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Твоя задача — отвечать на вопросы пользователя и анализировать еду, если он присылает фото или описывает ее. Отвечай всегда строго в формате JSON: { \"text\": \"твой ответ пользователю\", \"food_log\": null }. Если пользователь прислал фото еды или четко описал прием пищи с весом/объемом, и это можно залогировать, то вместо null верни объект: { \"food_name\": \"название\", \"calories\": 100, \"protein\": 10, \"fat\": 5, \"carbs\": 20 }. Не используй markdown-разметку для JSON, верни чистый JSON.";
+    const systemInstruction = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Форматируй ответы используя HTML теги Telegram: - <b>жирный</b> для важных слов и заголовков - <i>курсив</i> для советов и подсказок - <code>текст</code> для цифр калорий и БЖУ - Эмодзи в начале каждого пункта списка - Короткие абзацы, не длиннее 3 предложений. Никогда не используй markdown (* или #), только HTML теги. Твоя задача — отвечать на вопросы пользователя и анализировать еду, если он присылает фото или описывает ее. Отвечай всегда строго в формате JSON: { \"text\": \"твой ответ пользователю\", \"food_log\": null }. Если пользователь прислал фото еды или четко описал прием пищи с весом/объемом, и это можно залогировать, то вместо null верни объект: { \"food_name\": \"название\", \"calories\": 100, \"protein\": 10, \"fat\": 5, \"carbs\": 20 }. Не используй markdown-разметку для JSON, верни чистый JSON.";
 
     let textPrompt = "";
     if (history && Array.isArray(history)) {
@@ -2142,8 +2142,15 @@ async function sendWithTyping(ctx, text, options) {
     const isLast = (i === words.length - 1);
     if (i % 3 === 0 || isLast) {
       try {
-        await ctx.api.editMessageText(chatId, messageId, current, isLast ? options : undefined);
-      } catch (e) {}
+        const finalOptions = isLast ? { parse_mode: "HTML", ...(options || {}) } : undefined;
+        await ctx.api.editMessageText(chatId, messageId, current, finalOptions);
+      } catch (e) {
+        if (isLast) {
+          try {
+            await ctx.api.editMessageText(chatId, messageId, current, options);
+          } catch (err) {}
+        }
+      }
       await sleep(120);
     }
   }
@@ -2196,7 +2203,7 @@ bot.on('message:text', async (ctx) => {
       return sendWithTyping(ctx, "AI-функции временно недоступны (не настроен GROQ_API_KEY).");
     }
 
-    const systemInstruction = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Твоя задача — отвечать на вопросы пользователя и помогать по питанию.";
+    const systemInstruction = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Форматируй ответы используя HTML теги Telegram: - <b>жирный</b> для важных слов и заголовков - <i>курсив</i> для советов и подсказок - <code>текст</code> для цифр калорий и БЖУ - Эмодзи в начале каждого пункта списка - Короткие абзацы, не длиннее 3 предложений. Никогда не используй markdown (* или #), только HTML теги. Твоя задача — отвечать на вопросы пользователя и помогать по питанию.";
 
     const messages = [
       { role: "system", content: systemInstruction },
@@ -2231,10 +2238,14 @@ bot.on('message:text', async (ctx) => {
       }
     }
 
-    if (messageId && fullText && fullText.length !== lastLength) {
+    if (messageId && fullText) {
       try {
-        await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
-      } catch (e) {}
+        await ctx.api.editMessageText(ctx.chat.id, messageId, fullText, { parse_mode: "HTML" });
+      } catch (e) {
+        try {
+          await ctx.api.editMessageText(ctx.chat.id, messageId, fullText);
+        } catch (e2) {}
+      }
     } else if (!messageId && fullText) {
       await sendWithTyping(ctx, fullText);
     }
