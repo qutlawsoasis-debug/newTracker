@@ -1496,6 +1496,7 @@ function App() {
               targetCalories={targetCalories} 
               totalCalories={totalCalories}
               lostCalories={lostCalories}
+              streak={profile?.streak || 0}
               translations={translations[lang]} 
             />
 

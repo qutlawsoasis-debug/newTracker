@@ -1039,7 +1039,9 @@ app.get('/api/profile/:userId', async (req, res) => {
           user_ip: pData.user_ip || null,
           country: pData.country || null,
           region_name: pData.region_name || null,
-          city: pData.city || null
+          city: pData.city || null,
+          streak: pData.streak || 0,
+          last_active_date: pData.last_active_date || null
         };
         const responseData = { profile };
         console.log('GET /api/profile response:', JSON.stringify(responseData).slice(0, 200));
@@ -1533,7 +1535,9 @@ app.get('/api/meals', requireAuth, async (req, res) => {
           user_ip: pData.user_ip || null,
           country: pData.country || null,
           region_name: pData.region_name || null,
-          city: pData.city || null
+          city: pData.city || null,
+          streak: pData.streak || 0,
+          last_active_date: pData.last_active_date || null
         };
 
         // Geolocation Check
@@ -1934,6 +1938,63 @@ app.post('/api/meals', requireAuth, async (req, res) => {
         eaten_meals: eatenMeals || [],
         updated_at: new Date().toISOString()
       });
+
+      // Streak System Logic
+      if (Array.isArray(eatenMeals) && eatenMeals.length > 0) {
+        try {
+          const today = new Date().toISOString().split("T")[0];
+          const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+
+          let { data: userProf } = await supabase
+            .from("profiles")
+            .select("streak, last_active_date")
+            .eq("telegram_id", userId.toString())
+            .maybeSingle();
+
+          if (!userProf) {
+            const { data: userAlt } = await supabase
+              .from("users")
+              .select("streak, last_active_date")
+              .eq("telegram_id", userId.toString())
+              .maybeSingle();
+            userProf = userAlt;
+          }
+
+          if (userProf) {
+            let newStreak = 1;
+            if (userProf.last_active_date === yesterday) {
+              newStreak = (userProf.streak || 0) + 1;
+            } else if (userProf.last_active_date === today) {
+              newStreak = userProf.streak || 1;
+            }
+
+            await supabase.from("profiles").update({
+              streak: newStreak,
+              last_active_date: today
+            }).eq("telegram_id", userId.toString());
+
+            try {
+              await supabase.from("users").update({
+                streak: newStreak,
+                last_active_date: today
+              }).eq("telegram_id", userId.toString());
+            } catch(e) {}
+
+            // Appy milestone messages
+            if (userProf.last_active_date !== today) {
+              if (newStreak === 3) {
+                try { await bot.api.sendMessage(userId, "🔥 3 дня без пропусков! Ты в ударе! Так держать 💪"); } catch(e) {}
+              } else if (newStreak === 7) {
+                try { await bot.api.sendMessage(userId, "💪 Неделя идеального питания! Я горжусь тобой! 🏆"); } catch(e) {}
+              } else if (newStreak === 30) {
+                try { await bot.api.sendMessage(userId, "🏆 30 ДНЕЙ ПОДРЯД! Ты легенда! Эппи в восторге 🍏🔥"); } catch(e) {}
+              }
+            }
+          }
+        } catch (sErr) {
+          console.error("[Streak Calculation Error]:", sErr);
+        }
+      }
     } catch (err) {
       logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
       console.error("Failed to save state to Supabase:", err);

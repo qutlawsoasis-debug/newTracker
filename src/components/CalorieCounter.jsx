@@ -6,6 +6,7 @@ export default function CalorieCounter({
   eatenProteins = 0, targetProteins = 0,
   eatenFats = 0, targetFats = 0,
   eatenCarbs = 0, targetCarbs = 0,
+  streak = 0,
   translations 
 }) {
   const [displayCalories, setDisplayCalories] = useState(0);
@@ -107,7 +108,7 @@ export default function CalorieCounter({
       )}
 
       {/* Deficit / Surplus Indicator */}
-      <div className="pt-3 border-t border-zinc-200/60">
+      <div className="pt-3 border-t border-zinc-200/60 flex items-center justify-between">
         {showLost ? (
           <div className="border-l-2 border-zinc-300 pl-3 py-0.5 bg-zinc-500/[0.02]">
             <span className="text-[12px] font-medium text-zinc-400 block">
@@ -128,8 +129,14 @@ export default function CalorieCounter({
             </span>
           </div>
         )}
+
+        {streak >= 2 && (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-600 rounded-full text-xs font-bold">
+            <span>🔥</span>
+            <span>{streak} {translations?.dayProgress === "Прогресс за день" ? "дней подряд" : "Tage in Folge"}</span>
+          </div>
+        )}
       </div>
     </div>
-
   );
 }
