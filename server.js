@@ -893,7 +893,7 @@ app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('Subscribe error:', error.message, error.stack);
     logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', error?.message || String(error), error?.stack || '', 'Auto-captured backend error');
-    return res.status(500).json({ error: error.message, stack: error.stack });
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -1716,7 +1716,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
 } catch (e) {
   console.error('GET /api/meals FATAL:', e.message, e.stack);
   logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', e?.message || String(e), e?.stack || '', 'Auto-captured backend error');
-  return res.status(500).json({ error: e.message, stack: e.stack });
+  return res.status(500).json({ error: e.message });
 }
 });
 
