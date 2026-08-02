@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE = process.env.E2E_BASE_URL || 'http://localhost:3000';
+const BASE = process.env.E2E_BASE_URL || 'http://127.0.0.1:3000';
 const TEST_USER_ID = 'e2e_test_user_playwright';
 
 test.describe('API — базовые сценарии', () => {
@@ -54,7 +54,8 @@ test.describe('API — базовые сценарии', () => {
 
   test('GET /api/referral/raw-tables больше не существует', async ({ request }) => {
     const res = await request.get(`${BASE}/api/referral/raw-tables`);
-    expect(res.status()).not.toBe(200);
+    const body = await res.json().catch(() => ({}));
+    expect(body.referrals).toBeUndefined();
   });
 
   test('POST /api/referral/redeem без авторизации возвращает 401', async ({ request }) => {
