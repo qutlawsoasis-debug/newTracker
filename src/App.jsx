@@ -519,53 +519,39 @@ function App() {
       if (data.invoiceLink) {
         if (window.Telegram?.WebApp?.openInvoice) {
           window.Telegram.WebApp.openInvoice(data.invoiceLink, (status) => {
-            if (status === 'paid') {
-              let attempts = 0;
-              const pollProfile = async () => {
-                attempts++;
-                try {
-                  const pRes = await fetch(`/api/meals?userId=${userId}`);
-                  if (pRes.ok) {
-                    const pData = await pRes.json();
-                    if (pData.profile?.subscription_status === 'premium') {
-                      setProfile(pData.profile);
-                      alert('✅ Premium активирован!');
-                      return;
-                    }
-                  }
-                } catch (e) {}
-                if (attempts < 15) {
-                  setTimeout(pollProfile, 2000);
-                }
-              };
-              setTimeout(pollProfile, 2000);
-            } else if (status === 'cancelled') {
-              // ничего не делаем
-            } else if (status === 'failed') {
+            if (status === 'cancelled') return;
+            if (status === 'failed') {
               alert('Оплата не прошла. Попробуй ещё раз.');
-            } else {
-              // status === 'pending' или другой
-              // запускаем polling всё равно — Telegram Android иногда не возвращает 'paid'
-              let attempts = 0;
-              const pollProfile = async () => {
-                attempts++;
-                try {
-                  const pRes = await fetch(`/api/meals?userId=${userId}`);
-                  if (pRes.ok) {
-                    const pData = await pRes.json();
-                    if (pData.profile?.subscription_status === 'premium') {
-                      setProfile(pData.profile);
-                      alert('✅ Premium активирован!');
-                      return;
-                    }
-                  }
-                } catch (e) {}
-                if (attempts < 15) {
-                  setTimeout(pollProfile, 2000);
-                }
-              };
-              setTimeout(pollProfile, 3000);
+              return;
             }
+            // 'paid', 'pending' или другой — запускаем polling
+            let attempts = 0;
+            let cancelled = false;
+            const pollProfile = async () => {
+              if (cancelled) return;
+              attempts++;
+              try {
+                const pRes = await fetch(`/api/meals?userId=${userId}`);
+                if (pRes.ok) {
+                  const pData = await pRes.json();
+                  if (pData.profile?.subscription_status === 'premium') {
+                    setProfile(pData.profile);
+                    alert('✅ Premium активирован!');
+                    return;
+                  }
+                }
+              } catch (e) {}
+              if (attempts < 15 && !cancelled) {
+                setTimeout(pollProfile, 2000);
+              }
+            };
+            const delay = status === 'paid' ? 2000 : 3000;
+            const timerId = setTimeout(pollProfile, delay);
+            // Отмена polling если компонент размонтируется
+            return () => {
+              cancelled = true;
+              clearTimeout(timerId);
+            };
           });
         } else {
           window.open(data.invoiceLink, '_blank');
