@@ -1451,7 +1451,7 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 pt-5 pb-12">
+      <main className="max-w-lg mx-auto px-4 pt-5 pb-24">
         {activeTab === "timeline" && (
           <>
             {/* Locate Supermarkets banner */}
@@ -2144,7 +2144,7 @@ function App() {
 
             {/* Release notes changelog card */}
             {changelog && changelog.points && (
-              <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl p-4 pb-4 text-left shadow-sm mb-4">
+              <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl p-4 text-left shadow-sm">
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
                   Что нового в v{changelog.version}
                 </h4>
