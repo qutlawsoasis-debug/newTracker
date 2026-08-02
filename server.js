@@ -1296,20 +1296,26 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
     if (supabase) {
       try {
         const today = new Date().toISOString().split('T')[0];
-        const { data: usage } = await supabase
-          .from('chat_usage')
-          .select('message_count')
-          .eq('telegram_id', userId.toString())
-          .eq('usage_date', today)
-          .maybeSingle();
+        const { error: rpcErr } = await supabase.rpc('increment_chat_usage', {
+          p_telegram_id: userId.toString(),
+          p_date: today
+        });
+        if (rpcErr) {
+          const { data: usage } = await supabase
+            .from('chat_usage')
+            .select('message_count')
+            .eq('telegram_id', userId.toString())
+            .eq('usage_date', today)
+            .maybeSingle();
 
-        const currentCount = usage?.message_count || 0;
-        await supabase.from('chat_usage').upsert({
-          telegram_id: userId.toString(),
-          usage_date: today,
-          message_count: currentCount + 1,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'telegram_id,usage_date' });
+          const currentCount = usage?.message_count || 0;
+          await supabase.from('chat_usage').upsert({
+            telegram_id: userId.toString(),
+            usage_date: today,
+            message_count: currentCount + 1,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'telegram_id,usage_date' });
+        }
       } catch (incErr) {
         console.error("[Chat] Failed to update chat_usage:", incErr);
       }
