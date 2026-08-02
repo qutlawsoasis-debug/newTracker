@@ -1321,6 +1321,14 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
     responseText = responseText.replace(/<think>[\s\S]*/gi, '').trim();
     console.log(`[Chat] Groq response:`, responseText);
 
+    // Если после очистки think-блоков ответ пустой — fallback
+    if (!responseText || responseText.length < 5) {
+      return res.json({
+        text: "🍏 Не смог разобрать фото. Попробуй отправить более чёткое фото еды или опиши что ты съел текстом.",
+        food_log: null
+      });
+    }
+
     const data = safeJsonParse(responseText);
 
     if (data.food_log && supabase) {
