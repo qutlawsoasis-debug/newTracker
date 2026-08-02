@@ -2015,7 +2015,7 @@ app.post('/api/meals/replace-ready', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/api/logs', async (req, res) => {
+app.get('/api/logs', requireAuth, async (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
   const userId = req.query.userId;
   
