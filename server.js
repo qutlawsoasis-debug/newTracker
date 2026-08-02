@@ -2659,12 +2659,25 @@ const checkAndSendNotifications = async () => {
   }
 };
 
-if (!process.env.DISABLE_BOT) {
-  setInterval(checkAndSendNotifications, 60000);
-  console.log('Notification Scheduler started');
-}
+// Notification Scheduler — in serverless environment driven by Vercel Cron GET /api/cron/notify
+// if (!process.env.DISABLE_BOT) {
+//   setInterval(checkAndSendNotifications, 60000);
+//   console.log('Notification Scheduler started');
+// }
 
 // Vercel Cron Endpoints
+app.get('/api/cron/notify', async (req, res) => {
+  if (req.headers["x-vercel-cron"] !== "1" && process.env.NODE_ENV === "production") {
+    return res.status(401).end();
+  }
+  try {
+    await checkAndSendNotifications();
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("[Cron Notify Error]:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
 app.get('/api/cron/morning', async (req, res) => {
   if (req.headers["x-vercel-cron"] !== "1" && process.env.NODE_ENV === "production") {
     return res.status(401).end();
