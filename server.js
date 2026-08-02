@@ -80,6 +80,7 @@ if (!token) {
 
 // Initialize Telegram Bot
 const bot = new Bot(token);
+bot.init().catch(err => console.error('Failed to init bot:', err));
 
 // Initialize Groq AI (llama-3.3-70b-versatile)
 const groqApiKey = process.env.GROQ_API_KEY;
@@ -2183,7 +2184,6 @@ app.post('/api/telegram-webhook', async (req, res) => {
       }
     }
 
-    await bot.init();
     await bot.handleUpdate(update);
   } catch (err) {
     console.error("Telegram webhook handling error:", err);
