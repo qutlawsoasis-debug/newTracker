@@ -1312,7 +1312,9 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
       timeoutPromise
     ]);
 
-    const responseText = completion.choices[0].message.content.trim();
+    let responseText = completion.choices[0].message.content.trim();
+    // Удаляем <think>...</think> блоки до парсинга (qwen reasoning)
+    responseText = responseText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
     console.log(`[Chat] Groq response:`, responseText);
 
     const data = safeJsonParse(responseText);
