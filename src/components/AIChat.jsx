@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import eappyLogo from '../assets/eappy_avatar.png';
+import eappyLogo from '../assets/eappy_avatar_small.png';
 
 const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLogged, isPremium = false, onUpgradeClick }) => {
   const [inputValue, setInputValue] = useState("");
