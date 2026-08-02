@@ -31,6 +31,7 @@ function safeJsonParse(rawText) {
   try {
     // Удаляем <think>...</think> блоки (qwen reasoning модели)
     let cleanText = rawText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    cleanText = cleanText.replace(/<think>[\s\S]*/gi, '').trim();
     // Удаляем markdown json фенсы
     cleanText = cleanText.replace(/```json/gi, '').replace(/```/g, '').trim();
     return JSON.parse(cleanText);
@@ -1105,6 +1106,7 @@ app.post('/api/nutrition/scan', requireAuth, async (req, res) => {
 
     let responseText = completion.choices[0].message.content.trim();
     responseText = responseText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    responseText = responseText.replace(/<think>[\s\S]*/gi, '').trim();
     console.log(`[Scan] Groq response:`, responseText);
 
     const scanResult = safeJsonParse(responseText);
@@ -1314,8 +1316,9 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
     ]);
 
     let responseText = completion.choices[0].message.content.trim();
-    // Удаляем <think>...</think> блоки до парсинга (qwen reasoning)
+    // Удаляем <think>...</think> блоки (закрытые и незакрытые) до парсинга
     responseText = responseText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    responseText = responseText.replace(/<think>[\s\S]*/gi, '').trim();
     console.log(`[Chat] Groq response:`, responseText);
 
     const data = safeJsonParse(responseText);
