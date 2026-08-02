@@ -1264,7 +1264,7 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
   try {
     const systemInstructionText = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Форматируй ответы только через эмодзи и абзацы: используй эмодзи в начале каждого пункта (🍏 💪 ✅ ⚡ 📊), короткие абзацы, никаких HTML тегов, никакого markdown, максимум 3-4 предложения на абзац. Отвечай ТОЛЬКО на русском языке. Никаких английских слов кроме названий продуктов питания. Отвечай всегда строго в формате JSON: { \"text\": \"твой ответ\", \"food_log\": null }.";
 
-    const systemInstructionVision = "Ты эксперт-нутрициолог. Посмотри на фото еды и определи: название блюда, калории, белки, жиры, углеводы. Если на фото НЕТ еды — напиши только: НЕ ЕДА. Если еда есть — ответь строго в формате: БЛЮДО: название | КАЛОРИИ: число | БЕЛКИ: число | ЖИРЫ: число | УГЛЕВОДЫ: число. Никакого другого текста.";
+    const systemInstructionVision = "You are a nutrition expert. Look at the food photo and respond ONLY in this exact format, nothing else:\nFOOD: [dish name in Russian]\nCALORIES: [number]\nPROTEIN: [number]\nFAT: [number]\nCARBS: [number]\n\nIf there is NO food in the photo, respond ONLY with: NOT_FOOD\n\nDo not add any other text, explanations or formatting. Only the format above.";
 
     let textPrompt = "";
     if (history && Array.isArray(history)) {
@@ -1333,23 +1333,23 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
 
     // Парсинг текстового ответа vision модели
     if (image) {
-      if (responseText.includes('НЕ ЕДА') || responseText.trim().length < 5) {
+      if (responseText.includes('NOT_FOOD') || responseText.trim().length < 5) {
         return res.json({
           text: "🍏 На фото не вижу еды! Отправь фото блюда или напиши что ты съел — и я сразу посчитаю калории.",
           food_log: null
         });
       }
-      // Парсим текстовый формат: БЛЮДО: x | КАЛОРИИ: x | БЕЛКИ: x | ЖИРЫ: x | УГЛЕВОДЫ: x
+      // Парсим текстовый формат: FOOD: x | CALORIES: x | PROTEIN: x | FAT: x | CARBS: x
       const parseValue = (key) => {
         const match = responseText.match(new RegExp(key + ':\\s*([\\d.]+)', 'i'));
         return match ? parseFloat(match[1]) : 0;
       };
-      const nameMatch = responseText.match(/БЛЮДО:\s*([^|]+)/i);
+      const nameMatch = responseText.match(/FOOD:\s*([^\n]+)/i);
       const foodName = nameMatch ? nameMatch[1].trim() : 'Блюдо';
-      const calories = parseValue('КАЛОРИИ');
-      const protein = parseValue('БЕЛКИ');
-      const fat = parseValue('ЖИРЫ');
-      const carbs = parseValue('УГЛЕВОДЫ');
+      const calories = parseValue('CALORIES');
+      const protein = parseValue('PROTEIN');
+      const fat = parseValue('FAT');
+      const carbs = parseValue('CARBS');
       return res.json({
         text: `🍏 Распознано: ${foodName}\n\n📊 Калории: ${calories} ккал\n💪 Белки: ${protein}г | Жиры: ${fat}г | Углеводы: ${carbs}г`,
         food_log: calories > 0 ? { food_name: foodName, calories, protein, fat, carbs } : null
