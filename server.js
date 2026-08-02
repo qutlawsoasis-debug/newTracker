@@ -29,10 +29,17 @@ if (supabaseUrl && supabaseKey) {
 
 function safeJsonParse(rawText) {
   try {
-    const cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    // Удаляем <think>...</think> блоки (qwen reasoning модели)
+    let cleanText = rawText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    // Удаляем markdown json фенсы
+    cleanText = cleanText.replace(/```json/gi, '').replace(/```/g, '').trim();
     return JSON.parse(cleanText);
   } catch (e) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', e?.message || String(e), e?.stack || '', 'Auto-captured backend error');
+    logSystemError(
+      typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system',
+      'backend', 'error', e?.message || String(e), e?.stack || '',
+      'Auto-captured backend error'
+    );
     console.error("Failed to parse JSON from AI response:", rawText);
     throw e;
   }
