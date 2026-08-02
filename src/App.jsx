@@ -111,6 +111,7 @@ const translations = {
     rerolling: "Сброс...",
     zutatenLabel: "ингредиентов",
     settingsTitle: "Режим дня и уведомления",
+    resetAccount: "Сбросить профиль",
     wakeLabel: "Время подъема",
     bedLabel: "Время сна (отбоя)",
     notifyLabel: "Уведомления в Telegram",
@@ -1889,6 +1890,29 @@ function App() {
               }}
             />
 
+            {/* Streak Card */}
+            <div className="rounded-2xl border border-zinc-100 bg-white p-4 mb-5 shadow-sm">
+              <p className="text-xs text-zinc-400 uppercase tracking-wide mb-1 font-bold">
+                {lang === "ru" ? "Серия дней" : "Tage-Serie"}
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-zinc-900">{profile?.streak || 0}</span>
+                <span className="text-zinc-500 text-sm font-medium">
+                  {(profile?.streak || 0) === 1 
+                    ? (lang === "ru" ? "день подряд" : "Tag in Folge") 
+                    : (profile?.streak || 0) < 5 
+                    ? (lang === "ru" ? "дня подряд" : "Tage in Folge") 
+                    : (lang === "ru" ? "дней подряд" : "Tage in Folge")}
+                </span>
+                <span className="text-xl">🔥</span>
+              </div>
+              <p className="text-xs text-zinc-400 mt-1 font-medium">
+                {lang === "ru" 
+                  ? "Отмечай приёмы пищи каждый день чтобы не терять серию" 
+                  : "Markiere deine Mahlzeiten täglich, um die Serie nicht zu verlieren"}
+              </p>
+            </div>
+
             {/* AI Dietitian Analysis Summary Card */}
             {profile?.aiAnalysisText && (
               <div className="bg-zinc-50 border border-zinc-200 p-5 mb-5 rounded-xl shadow-sm relative overflow-hidden">
@@ -2102,9 +2126,10 @@ function App() {
                 <div className="pt-4 mt-4 border-t border-zinc-100 flex justify-center">
                   <button
                     onClick={handleResetAccount}
-                    className="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors py-2 px-4 border border-red-200 rounded-xl bg-red-50 hover:bg-red-100 w-full"
+                    className="w-full py-3 rounded-xl border border-red-300 text-red-500 text-sm font-medium bg-white hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
                   >
-                    {translations[lang].resetAccount}
+                    <span>🗑️</span>
+                    <span>{lang === "ru" ? "Сбросить профиль" : (translations[lang]?.resetAccount || "Сбросить профиль")}</span>
                   </button>
                 </div>
                 </div>
