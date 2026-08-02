@@ -834,7 +834,7 @@ app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
       prices: [{ label: "Premium 30 дней", amount: 1 }]
     });
 
-    console.log("Invoice link created successfully:", invoiceLink);
+    console.log("Invoice link created successfully for user:", userId);
     return res.json({ invoiceLink });
   } catch (error) {
     console.error('Subscribe error:', error.message, error.stack);
@@ -882,7 +882,6 @@ app.get('/api/profile/:userId', async (req, res) => {
           last_active_date: pData.last_active_date || null
         };
         const responseData = { profile };
-        console.log('GET /api/profile response:', JSON.stringify(responseData).slice(0, 200));
         return res.json(responseData);
       }
     } catch (err) {
@@ -890,7 +889,6 @@ app.get('/api/profile/:userId', async (req, res) => {
     }
   }
   const fallbackRes = { profile: null };
-  console.log('GET /api/profile response:', JSON.stringify(fallbackRes).slice(0, 200));
   return res.json(fallbackRes);
 });
 
@@ -1373,7 +1371,7 @@ app.post('/api/profile', requireAuth, async (req, res) => {
         subscription_status: subscriptionStatus
       }).select();
       
-      console.log('DEBUG: DB Query result for user', userId, ':', data);
+
       if (error) {
         console.error('DEBUG: Error saving profile:', error);
       }
@@ -2040,7 +2038,7 @@ app.post('/api/telegram-webhook', async (req, res) => {
             .eq('telegram_id', userId)
             .maybeSingle();
 
-          console.log("Verified profiles update in DB:", updatedProf, checkErr ? checkErr.message : '');
+          console.log("Verified profiles update in DB: ok");
 
           // Check if user was referred (+200 points to referrer)
           const { data: refRecord } = await supabase
