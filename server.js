@@ -1287,7 +1287,7 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
 
     const completion = await Promise.race([
       groq.chat.completions.create({
-        model: image ? "meta-llama/llama-4-scout-17b-16e-instruct" : "llama-3.3-70b-versatile",
+        model: image ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
         messages: groqMessages,
         max_tokens: 1000,
         response_format: { type: "json_object" }
