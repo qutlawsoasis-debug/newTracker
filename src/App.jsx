@@ -363,8 +363,7 @@ function App() {
     missedCalories: 0
   });
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [isLocating, setIsLocating] = useState(false);
-  const [gpsFailed, setGpsFailed] = useState(false);
+
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [todayScannedCalories, setTodayScannedCalories] = useState(0);
@@ -1133,96 +1132,7 @@ function App() {
     }
   };
 
-  const sendGpsToServer = async (lat, lon) => {
-    setIsLocating(true);
-    try {
-      const res = await fetch('/api/profile/gps', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, lat, lon })
-      });
-      if (res.ok) {
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Server error: " + res.status);
-        }
-        const data = await res.json();
-        if (data && data.profile) {
-          setProfile(prev => prev ? {
-            ...prev,
-            country: data.profile.country || prev.country,
-            region_name: data.profile.region_name || prev.region_name,
-            city: data.profile.city || prev.city
-          } : data.profile);
-        }
-      } else {
-        throw new Error("HTTP error " + res.status);
-      }
-    } catch (err) {
-      console.error("GPS reverse geocoding update failed:", err);
-      alert(lang === "ru" ? `Ошибка определения локации: ${err.message}` : `Location resolution error: ${err.message}`);
-    } finally {
-      setIsLocating(false);
-    }
-  };
 
-  const handleLocateSupermarkets = () => {
-    const tg = window.Telegram?.WebApp;
-    if (tg?.Location?.requestPermission) {
-      tg.Location.requestPermission((hasAccess) => {
-        if (hasAccess) {
-          tg.Location.getLocation((data) => {
-            if (data && data.latitude) {
-              sendGpsToServer(data.latitude, data.longitude);
-            } else {
-              setGpsFailed(true);
-            }
-          });
-        } else {
-          setGpsFailed(true);
-        }
-      });
-    } else if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          sendGpsToServer(latitude, longitude);
-        },
-        (error) => {
-          console.error("Browser Geolocation failed:", error);
-          setGpsFailed(true);
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
-    } else {
-      setGpsFailed(true);
-    }
-  };
-
-  const handleSendGeoViaChat = async () => {
-    setIsLocating(true);
-    try {
-      const res = await fetch('/api/profile/trigger-geo-button', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
-      });
-      if (res.ok) {
-        const tg = window.Telegram?.WebApp;
-        if (tg && typeof tg.close === 'function') {
-          tg.close();
-        } else {
-          alert(lang === "ru" 
-            ? "Запрос отправлен в чат-бота! Пожалуйста, перейдите в чат с ботом и поделитесь локацией." 
-            : "Request sent to chat bot! Please go to your chat with the bot and share your location.");
-        }
-      } else {
-        throw new Error("Trigger endpoint failed");
-      }
-      } finally {
-        setIsLocating(false);
-      }
-    };
 
   // Sync profile edits with server calculations
   const updateProfileOnServer = async (updatedProfile) => {
@@ -1463,42 +1373,7 @@ function App() {
       <main className={`max-w-lg mx-auto px-4 pt-5 ${activeTab === "profile" ? "pb-6" : "pb-24"}`}>
         {activeTab === "timeline" && (
           <>
-            {/* Locate Supermarkets banner */}
-            {(!profile || !profile.city || profile.city === "Эссен" || profile.city.toLowerCase() === "essen") && (
-              <div className="p-4 bg-zinc-50 border-l-2 border-zinc-800 border border-zinc-200 rounded-r-xl rounded-l-none mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-                <div>
-                  <div className="text-xs font-semibold text-zinc-800">
-                    {lang === "ru" ? "Точная привязка магазинов" : "Precise Supermarket Locator"}
-                  </div>
-                  <div className="text-[11px] text-zinc-500 mt-0.5">
-                    {lang === "ru" 
-                      ? (gpsFailed 
-                          ? "Доступ к GPS заблокирован. Пожалуйста, отправьте координаты через нашего чат-бота."
-                          : "Для точного подбора продуктов и готовых блюд в магазинах у дома (REWE, ALDI, LIDL) привяжите точную геолокацию.")
-                      : (gpsFailed
-                          ? "GPS access blocked. Please send your location via our Telegram chat bot."
-                          : "To select correct products in local supermarkets (REWE, ALDI, LIDL), bind your precise location.")}
-                  </div>
-                </div>
-                <button
-                  disabled={isLocating}
-                  onClick={gpsFailed ? handleSendGeoViaChat : handleLocateSupermarkets}
-                  className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 disabled:opacity-60 text-white font-semibold rounded-lg text-xs active:scale-[0.98] transition-all shadow-sm"
-                >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <span>
-                    {isLocating 
-                      ? (lang === "ru" ? "Обработка..." : "Processing...") 
-                      : (gpsFailed 
-                          ? (lang === "ru" ? "Отправить через чат бота" : "Send via chat bot")
-                          : (lang === "ru" ? "Найти магазины рядом" : "Find shops nearby"))}
-                  </span>
-                </button>
-              </div>
-            )}
+
 
             {/* Dashboard Calorie Card */}
             <CalorieCounter 

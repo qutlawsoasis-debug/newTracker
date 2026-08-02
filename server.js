@@ -692,60 +692,7 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
 
 
 
-const ensureUserGeolocation = async (userId, profileData, req) => {
-  if (!supabase || !profileData || !userId) return profileData;
 
-  // If already geolocated, skip lookup
-  if (profileData.city && profileData.country) {
-    return profileData;
-  }
-
-  const userIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
-  if (!userIp || userIp === '127.0.0.1' || userIp === '::1' || userIp.startsWith('127.') || userIp.startsWith('192.168.') || userIp.startsWith('10.') || userIp.startsWith('172.16.')) {
-    return profileData;
-  }
-
-  try {
-    console.log(`[GeoIP] Performing lookup for user ${userId} with IP ${userIp}`);
-    const geoRes = await fetch(`http://ip-api.com/json/${userIp}?lang=ru`);
-    if (geoRes.ok) {
-      const data = await geoRes.json();
-      if (data && data.status === 'success') {
-        const country = data.country || '';
-        const regionName = data.regionName || '';
-        const city = data.city || '';
-
-        console.log(`[GeoIP] Successfully geolocated user ${userId} to ${city}, ${regionName}, ${country}`);
-
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            user_ip: userIp,
-            country: country,
-            region_name: regionName,
-            city: city,
-            updated_at: new Date().toISOString()
-          })
-          .eq('telegram_id', userId.toString());
-
-        if (error) {
-          console.error("[GeoIP] Failed to update profiles table with geolocation data:", error);
-        } else {
-          profileData.user_ip = userIp;
-          profileData.country = country;
-          profileData.region_name = regionName;
-          profileData.city = city;
-        }
-      } else {
-        console.warn(`[GeoIP] Lookup failed for IP ${userIp}: ${data?.message || 'unknown error'}`);
-      }
-    }
-  } catch (err) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
-    console.error("[GeoIP] Geolocation lookup error:", err);
-  }
-  return profileData;
-};
 
 const getGlobalAnalytics = async (userId) => {
   let globalEatenCount = 0;
@@ -906,79 +853,7 @@ app.post('/api/profile/subscribe', requireAuth, async (req, res) => {
   }
 });
 
-// API to reverse geocode GPS coordinates via OSM Nominatim and update user location
-app.post('/api/profile/gps', requireAuth, async (req, res) => {
-  const { lat, lon } = req.body;
-  const userId = req.user.id;
-  if (!userId || lat === undefined || lon === undefined) {
-    return res.status(400).json({ error: 'Bad Request: Missing userId, lat, or lon' });
-  }
 
-  try {
-    console.log(`[ReverseGeo] Nominatim lookup for user ${userId} at lat=${lat}, lon=${lon}`);
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1&accept-language=ru`;
-    
-    // Nominatim requires User-Agent. Include contact email/bot identifier as requested by usage policy.
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'GainTrackerBot/1.1.2 (magne@gemini-antigravity.local)'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Nominatim API returned HTTP status ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (data && data.address) {
-      const address = data.address;
-      
-      const country = address.country || '';
-      const regionName = address.state || address.region || '';
-      
-      // Determine the best match for city/town/village/suburb as requested
-      const baseCity = address.city || address.town || address.village || address.hamlet || address.county || '';
-      const suburb = address.suburb || '';
-      const city = suburb && baseCity ? `${baseCity}, ${suburb}` : (baseCity || suburb || '');
-
-      console.log(`[ReverseGeo] Resolved user ${userId} to city="${city}", region="${regionName}", country="${country}"`);
-
-      // Update Supabase profiles table
-      if (supabase) {
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            country,
-            region_name: regionName,
-            city,
-            updated_at: new Date().toISOString()
-          })
-          .eq('telegram_id', userId.toString());
-          
-        if (error) {
-          console.error("[ReverseGeo] Failed to update profile with precise coordinates in Supabase:", error);
-        }
-      }
-
-      // Sync local userStates cache
-
-      return res.json({
-        success: true,
-        profile: {
-          country,
-          region_name: regionName,
-          city
-        }
-      });
-    } else {
-      throw new Error("No address details in Nominatim response");
-    }
-  } catch (err) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
-    console.error("[ReverseGeo] Nominatim resolution failed:", err);
-    return res.status(500).json({ error: "Failed to reverse geocode: " + err.message });
-  }
-});
 
 // Endpoint GET /api/profile/:userId (No-cache profile lookup)
 app.get('/api/profile/:userId', async (req, res) => {
@@ -1029,30 +904,7 @@ app.get('/api/profile/:userId', async (req, res) => {
   return res.json(fallbackRes);
 });
 
-// API to trigger Telegram location request message in chat
-app.post('/api/profile/trigger-geo-button', requireAuth, async (req, res) => {
-  const { userId: _unused } = req.body;
-  const userId = req.user.id;
-  if (!userId) {
-    return res.status(400).json({ error: 'Bad Request: Missing userId' });
-  }
 
-  try {
-    console.log(`[GeoTrigger] Sending chat location request keyboard to user ${userId}`);
-    await bot.api.sendMessage(userId, "Для точной привязки магазинов нажмите на кнопку ниже 👇", {
-      reply_markup: {
-        keyboard: [[{ text: "📍 Поделиться локацией", request_location: true }]],
-        resize_keyboard: true,
-        one_time_keyboard: true
-      }
-    });
-    return res.json({ success: true });
-  } catch (err) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
-    console.error("[GeoTrigger] Failed to send location keyboard:", err);
-    return res.status(500).json({ error: "Failed to trigger chat geolocator: " + err.message });
-  }
-});
 
 // Helper to parse base64 image data URL
 function parseDataUrl(dataUrl) {
@@ -1549,9 +1401,6 @@ app.post('/api/profile', requireAuth, async (req, res) => {
     }
 
     let finalProfile = { ...profileData };
-    if (supabase) {
-      finalProfile = await ensureUserGeolocation(userId, finalProfile, req);
-    }
 
     // Save profile to userStates cache
 
@@ -1610,8 +1459,7 @@ app.get('/api/meals', requireAuth, async (req, res) => {
           last_active_date: pData.last_active_date || null
         };
 
-        // Geolocation Check
-        profile = await ensureUserGeolocation(userId, profile, req);
+
 
         // 2. Fetch weight history
         let { data: wData, error: wErr } = await supabase
