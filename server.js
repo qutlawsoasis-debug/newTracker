@@ -1095,7 +1095,16 @@ app.post('/api/nutrition/scan', requireAuth, async (req, res) => {
 
     const scanResult = safeJsonParse(responseText);
 
-    if (!scanResult.food_name || scanResult.calories === undefined || scanResult.protein === undefined || scanResult.fat === undefined || scanResult.carbs === undefined) {
+    // Если на фото не еда — вернуть понятное сообщение без логирования
+    if (scanResult.not_food === true || !scanResult.food_name) {
+      return res.json({
+        success: false,
+        not_food: true,
+        message: "🍏 На фото не вижу еды! Отправь фото блюда или напиши что ты съел."
+      });
+    }
+
+    if (scanResult.calories === undefined || scanResult.protein === undefined || scanResult.fat === undefined || scanResult.carbs === undefined) {
       throw new Error("Invalid food JSON response structure from Groq");
     }
 
