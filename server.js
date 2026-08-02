@@ -1093,8 +1093,7 @@ app.post('/api/nutrition/scan', requireAuth, async (req, res) => {
           ]
         }
       ],
-      max_tokens: 1000,
-      response_format: { type: "json_object" }
+      max_tokens: 1000
     });
 
     const responseText = completion.choices[0].message.content.trim();
@@ -1292,13 +1291,17 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
       ];
     }
 
+    const groqParams = {
+      model: image ? "qwen/qwen3.6-27b" : "llama-3.3-70b-versatile",
+      messages: groqMessages,
+      max_tokens: 1000,
+    };
+    if (!image) {
+      groqParams.response_format = { type: "json_object" };
+    }
+
     const completion = await Promise.race([
-      groq.chat.completions.create({
-        model: image ? "qwen/qwen3.6-27b" : "llama-3.3-70b-versatile",
-        messages: groqMessages,
-        max_tokens: 1000,
-        response_format: { type: "json_object" }
-      }),
+      groq.chat.completions.create(groqParams),
       timeoutPromise
     ]);
 
