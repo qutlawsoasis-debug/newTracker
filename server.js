@@ -1721,10 +1721,9 @@ app.get('/api/meals', requireAuth, async (req, res) => {
 });
 
 // Endpoint POST /api/meals/regenerate (Premium menu regeneration via Groq)
-app.post('/api/meals/regenerate', async (req, res) => {
+app.post('/api/meals/regenerate', requireAuth, async (req, res) => {
   try {
-    const userId = req.body?.userId || req.query?.userId;
-    if (!userId) return res.status(400).json({ error: 'userId required' });
+    const userId = req.user.id;
 
     const profilePromise = supabase
       .from('profiles')
