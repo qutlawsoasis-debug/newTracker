@@ -1257,13 +1257,29 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
 
     console.log('[Chat] Sending request to Groq...');
 
+    let groqMessages;
+    if (image) {
+      groqMessages = [
+        { role: "system", content: systemInstruction },
+        {
+          role: "user",
+          content: [
+            { type: "image_url", image_url: { url: image } },
+            { type: "text", text: message || "Что на этом фото? Определи блюдо и рассчитай КБЖУ." }
+          ]
+        }
+      ];
+    } else {
+      groqMessages = [
+        { role: "system", content: systemInstruction },
+        { role: "user", content: textPrompt }
+      ];
+    }
+
     const completion = await Promise.race([
       groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemInstruction },
-          { role: "user", content: textPrompt }
-        ],
+        model: image ? "meta-llama/llama-4-scout-17b-16e-instruct" : "llama-3.3-70b-versatile",
+        messages: groqMessages,
         max_tokens: 1000,
         response_format: { type: "json_object" }
       }),
