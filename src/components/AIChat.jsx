@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import eappyLogo from '../assets/hero.png';
 
 const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLogged, isPremium = false, onUpgradeClick }) => {
   const [inputValue, setInputValue] = useState("");
@@ -210,9 +211,11 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
         {/* Header */}
         <div className="shrink-0 px-5 py-4 bg-white border-b border-zinc-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold text-lg">
-              ✨
-            </div>
+            <img 
+              src={eappyLogo} 
+              alt="Эппи" 
+              className="w-10 h-10 rounded-full object-cover shadow-sm"
+            />
             <div>
               <h3 className="text-base font-bold text-zinc-900 leading-snug">
                 {lang === "ru" ? "Эппи" : "Appy"}
