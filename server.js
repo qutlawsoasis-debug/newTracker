@@ -947,7 +947,7 @@ app.post('/api/nutrition/scan', requireAuth, async (req, res) => {
     let responseText = completion.choices[0].message.content.trim();
     responseText = responseText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
     responseText = responseText.replace(/<think>[\s\S]*/gi, '').trim();
-    console.log(`[Scan] Groq response:`, responseText);
+    console.log(`[Scan] Groq response received, length: ${responseText.length}`);
 
     const scanResult = safeJsonParse(responseText);
 
@@ -1161,7 +1161,7 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
     // Удаляем <think>...</think> блоки (закрытые и незакрытые) до парсинга
     responseText = responseText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
     responseText = responseText.replace(/<think>[\s\S]*/gi, '').trim();
-    console.log(`[Chat] Groq response:`, responseText);
+    console.log(`[Chat] Groq response received, length: ${responseText.length}`);
 
     // Если после очистки think-блоков ответ пустой — fallback
     if (!responseText || responseText.length < 5) {
@@ -1373,7 +1373,7 @@ app.post('/api/profile', requireAuth, async (req, res) => {
       
 
       if (error) {
-        console.error('DEBUG: Error saving profile:', error);
+        console.error('Error saving profile:', error.message);
       }
 
       // Save weight to history only if weight has changed from previous profile value
