@@ -4,22 +4,11 @@ import { Gift, Copy, Check, Users, Sparkles, Share2 } from "lucide-react";
 export default function ReferralCard({ userId, lang = "ru", points = 0, referralStats, onRedeemSuccess }) {
   const [copied, setCopied] = useState(false);
   const [isRedeeming, setIsRedeeming] = useState(false);
-  const [internalStats, setInternalStats] = useState(null);
 
   const isRu = lang === "ru";
   const refLink = `https://t.me/TrackerCPFC_bot?start=ref_${userId}`;
 
-  React.useEffect(() => {
-    if (!userId) return;
-    fetch(`/api/referral/stats?userId=${userId}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) setInternalStats(data);
-      })
-      .catch(() => {});
-  }, [userId, points]);
-
-  const activeStats = referralStats || internalStats;
+  const activeStats = referralStats;
   const currentPoints = activeStats?.points !== undefined ? activeStats.points : points;
   const totalInvited = activeStats?.total_invited || 0;
   const totalConverted = activeStats?.total_converted || 0;
@@ -52,7 +41,7 @@ export default function ReferralCard({ userId, lang = "ru", points = 0, referral
       const res = await fetch("/api/referral/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId })
+        body: JSON.stringify({})
       });
       const data = await res.json();
       if (res.ok && data.success) {
