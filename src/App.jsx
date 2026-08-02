@@ -1338,11 +1338,9 @@ function App() {
             </div>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-[10px] font-medium text-zinc-400 capitalize">{dateStr}</span>
-              {(profile?.streak || 0) > 0 && (
-                <span className="text-[10px] font-bold text-orange-500 flex items-center gap-0.5">
-                  🔥 {profile.streak} {lang === "ru" ? "дн." : "Tage"}
-                </span>
-              )}
+              <span className="text-[10px] font-bold text-orange-500 flex items-center gap-0.5">
+                🔥 {profile?.streak || 0} {lang === "ru" ? "дн." : "Tage"}
+              </span>
             </div>
           </div>
           
