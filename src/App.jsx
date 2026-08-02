@@ -2144,7 +2144,7 @@ function App() {
 
             {/* Release notes changelog card */}
             {changelog && changelog.points && (
-              <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl p-4 text-left shadow-sm">
+              <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl p-4 text-left shadow-sm mb-0">
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
                   Что нового в v{changelog.version}
                 </h4>
