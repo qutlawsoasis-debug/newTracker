@@ -1200,6 +1200,9 @@ app.get('/api/npc/chat-limit', requireAuth, async (req, res) => {
 
 app.post('/api/npc/chat', requireAuth, async (req, res) => {
   const { message, image, history } = req.body;
+  if (message && message.length > 2000) {
+    return res.status(400).json({ error: 'Message too long (max 2000 characters)' });
+  }
   const userId = req.user.id;
 
   if (!userId || (!message && !image)) {
@@ -1366,9 +1369,9 @@ app.post('/api/profile', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'Bad Request: Missing profile parameters' });
   }
 
-  if (age < 0 || age > 120) return res.status(400).json({error: "Invalid age"});
-  if (weight < 20 || weight > 300) return res.status(400).json({error: "Invalid weight"});
-  if (height < 100 || height > 250) return res.status(400).json({error: "Invalid height"});
+  if (!age || age <= 0 || age > 120) return res.status(400).json({error: "Invalid age"});
+  if (!weight || weight <= 0 || weight > 300) return res.status(400).json({error: "Invalid weight"});
+  if (!height || height <= 0 || height > 250) return res.status(400).json({error: "Invalid height"});
 
   if (!groqApiKey) {
     return res.status(500).json({ error: 'AI features are not configured (missing Groq API key)' });
