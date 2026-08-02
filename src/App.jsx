@@ -1451,7 +1451,7 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 pt-5 pb-24">
+      <main className={`max-w-lg mx-auto px-4 pt-5 ${activeTab === "profile" ? "pb-6" : "pb-24"}`}>
         {activeTab === "timeline" && (
           <>
             {/* Locate Supermarkets banner */}
