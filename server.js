@@ -1975,6 +1975,73 @@ app.post('/api/meals/replace-ready', requireAuth, async (req, res) => {
   }
 });
 
+// API to reroll a single meal section using AI menu generator
+app.post('/api/meals/reroll-single', requireAuth, async (req, res) => {
+  const { section } = req.body;
+  const userId = req.user.id;
+
+  if (!section || !['breakfast', 'lunch', 'snack', 'night'].includes(section)) {
+    return res.status(400).json({ error: 'Bad Request: Invalid or missing section' });
+  }
+
+  if (!supabase) return res.status(500).json({ error: "Supabase required for this action." });
+
+  try {
+    const { data: profile } = await supabase.from('profiles').select('*').eq('telegram_id', userId.toString()).maybeSingle();
+    if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+    const todayStr = new Date().toDateString();
+    const { data: plan } = await supabase.from('daily_plans').select('*').eq('telegram_id', userId.toString()).eq('date', todayStr).maybeSingle();
+
+    const formattedProfile = {
+      gender: profile.gender,
+      age: profile.age,
+      height: profile.height,
+      weight: profile.weight,
+      activity: parseFloat(profile.activity),
+      goal: profile.goal,
+      targetCalories: profile.target_calories,
+      city: profile.city,
+      country: profile.country,
+      region_name: profile.region_name
+    };
+
+    const newDailyMenu = await generateDailyMenu(formattedProfile);
+
+    let newMeal = newDailyMenu[section];
+    if (!newMeal && section === 'snack') {
+      const pool = profile.goal === 'gain' ? mealsData.high : mealsData.light;
+      if (pool.snack && pool.snack.length > 0) {
+        newMeal = pool.snack[Math.floor(Math.random() * pool.snack.length)];
+      }
+    }
+
+    if (!newMeal) {
+      return res.status(500).json({ error: 'Failed to generate new meal for section' });
+    }
+
+    const currentMeals = plan?.meals || {};
+    currentMeals[section] = newMeal;
+
+    let eatenMeals = plan?.eaten_meals || [];
+    eatenMeals = eatenMeals.filter(s => s !== section);
+
+    await supabase.from('daily_plans').upsert({
+      telegram_id: userId.toString(),
+      date: todayStr,
+      meals: currentMeals,
+      eaten_meals: eatenMeals,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'telegram_id,date' });
+
+    return res.json({ success: true, meal: newMeal });
+  } catch (err) {
+    logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Single meal reroll failure');
+    console.error("Single meal reroll failed:", err);
+    return res.status(500).json({ error: "Failed to reroll single meal: " + err.message });
+  }
+});
+
 app.get('/api/logs', requireAuth, async (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
   const userId = req.query.userId;

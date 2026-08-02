@@ -889,28 +889,32 @@ function App() {
     };
   }, [meals, eatenMeals, targetCalories, targetMacros, todayScannedMacros]);
 
-  // Single meal local reroll fallback (random select from correct goal pool)
+  // Single meal AI reroll endpoint
   const handleReroll = useCallback(async (section) => {
     if (!profile) return;
     try {
-      const res = await fetch(`/api/meals?userId=${userId}&regenerate=true&section=${section}`);
+      const res = await fetch("/api/meals/reroll-single", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, section })
+      });
       if (res.ok) {
         const contentType = res.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
           throw new Error("Server error: " + res.status);
         }
         const data = await res.json();
-        if (data.meals && data.meals[section]) {
+        if (data.meal) {
           setMeals(prev => ({
             ...prev,
-            [section]: data.meals[section]
+            [section]: data.meal
           }));
           // Reset checked state for the single meal being rerolled
           setEatenMeals(prev => prev.filter(s => s !== section));
         }
       }
     } catch (err) {
-      console.error("Local reroll failed", err);
+      console.error("Single meal reroll failed", err);
     }
   }, [profile, userId]);
 
