@@ -1262,7 +1262,9 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
   }
 
   try {
-    const systemInstruction = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Форматируй ответы только через эмодзи и абзацы: - Используй эмодзи в начале каждого пункта (🍏 💪 ✅ ⚡ 📊) - Короткие абзацы через двойной перенос строки - Никаких HTML тегов, никакого markdown - Максимум 3-4 предложения на абзац. Твоя задача — отвечать на вопросы пользователя и анализировать еду, если он присылает фото или описывает ее. Отвечай всегда строго в формате JSON: { \"text\": \"твой ответ пользователю\", \"food_log\": null }. Если пользователь прислал фото еды или четко описал прием пищи с весом/объемом, и это можно залогировать, то вместо null верни объект: { \"food_name\": \"название\", \"calories\": 100, \"protein\": 10, \"fat\": 5, \"carbs\": 20 }. Не используй markdown-разметку для JSON, верни чистый JSON. КРИТИЧЕСКИ ВАЖНО: Если на изображении нет еды, блюда или продуктов питания (фото людей, природы, животных, предметов) — верни {\"text\": \"🍏 На фото не вижу еды! Отправь фото блюда или напиши что ты съел — и я сразу посчитаю калории.\", \"food_log\": null} и НЕ ПРИДУМЫВАЙ никакие калории или блюда. Отвечай ТОЛЬКО на русском языке. Никаких английских слов кроме названий продуктов питания.";
+    const systemInstructionText = "Ты Эппи — дружелюбный но иногда строгий наставник по питанию. У тебя есть характер и настроение. Если пользователь пропустил приём пищи — мягко упрекни. Если выполнил план — похвали с энтузиазмом. Форматируй ответы только через эмодзи и абзацы: используй эмодзи в начале каждого пункта (🍏 💪 ✅ ⚡ 📊), короткие абзацы, никаких HTML тегов, никакого markdown, максимум 3-4 предложения на абзац. Отвечай ТОЛЬКО на русском языке. Никаких английских слов кроме названий продуктов питания.";
+
+    const systemInstructionVision = "Ты эксперт-нутрициолог. Посмотри на фото еды и определи: название блюда, калории, белки, жиры, углеводы. Если на фото НЕТ еды — напиши только: НЕ ЕДА. Если еда есть — ответь строго в формате: БЛЮДО: название | КАЛОРИИ: число | БЕЛКИ: число | ЖИРЫ: число | УГЛЕВОДЫ: число. Никакого другого текста.";
 
     let textPrompt = "";
     if (history && Array.isArray(history)) {
@@ -1285,18 +1287,18 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
     let groqMessages;
     if (image) {
       groqMessages = [
-        { role: "system", content: systemInstruction },
+        { role: "system", content: systemInstructionVision },
         {
           role: "user",
           content: [
             { type: "image_url", image_url: { url: image } },
-            { type: "text", text: message || "Что на этом фото? Определи блюдо и рассчитай КБЖУ." }
+            { type: "text", text: "Что на фото?" }
           ]
         }
       ];
     } else {
       groqMessages = [
-        { role: "system", content: systemInstruction },
+        { role: "system", content: systemInstructionText },
         { role: "user", content: textPrompt }
       ];
     }
@@ -1326,6 +1328,31 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
       return res.json({
         text: "🍏 Не смог разобрать фото. Попробуй отправить более чёткое фото еды или опиши что ты съел текстом.",
         food_log: null
+      });
+    }
+
+    // Парсинг текстового ответа vision модели
+    if (image) {
+      if (responseText.includes('НЕ ЕДА') || responseText.trim().length < 5) {
+        return res.json({
+          text: "🍏 На фото не вижу еды! Отправь фото блюда или напиши что ты съел — и я сразу посчитаю калории.",
+          food_log: null
+        });
+      }
+      // Парсим текстовый формат: БЛЮДО: x | КАЛОРИИ: x | БЕЛКИ: x | ЖИРЫ: x | УГЛЕВОДЫ: x
+      const parseValue = (key) => {
+        const match = responseText.match(new RegExp(key + ':\\s*([\\d.]+)', 'i'));
+        return match ? parseFloat(match[1]) : 0;
+      };
+      const nameMatch = responseText.match(/БЛЮДО:\s*([^|]+)/i);
+      const foodName = nameMatch ? nameMatch[1].trim() : 'Блюдо';
+      const calories = parseValue('КАЛОРИИ');
+      const protein = parseValue('БЕЛКИ');
+      const fat = parseValue('ЖИРЫ');
+      const carbs = parseValue('УГЛЕВОДЫ');
+      return res.json({
+        text: `🍏 Распознано: ${foodName}\n\n📊 Калории: ${calories} ккал\n💪 Белки: ${protein}г | Жиры: ${fat}г | Углеводы: ${carbs}г`,
+        food_log: calories > 0 ? { food_name: foodName, calories, protein, fat, carbs } : null
       });
     }
 
