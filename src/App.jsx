@@ -1891,27 +1891,32 @@ function App() {
             />
 
             {/* Streak Card */}
-            <div className="rounded-2xl border border-zinc-100 bg-white p-4 mb-5 shadow-sm">
-              <p className="text-xs text-zinc-400 uppercase tracking-wide mb-1 font-bold">
-                {lang === "ru" ? "Серия дней" : "Tage-Serie"}
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-zinc-900">{profile?.streak || 0}</span>
-                <span className="text-zinc-500 text-sm font-medium">
-                  {(profile?.streak || 0) === 1 
-                    ? (lang === "ru" ? "день подряд" : "Tag in Folge") 
-                    : (profile?.streak || 0) < 5 
-                    ? (lang === "ru" ? "дня подряд" : "Tage in Folge") 
-                    : (lang === "ru" ? "дней подряд" : "Tage in Folge")}
-                </span>
-                <span className="text-xl">🔥</span>
-              </div>
-              <p className="text-xs text-zinc-400 mt-1 font-medium">
-                {lang === "ru" 
-                  ? "Отмечай приёмы пищи каждый день чтобы не терять серию" 
-                  : "Markiere deine Mahlzeiten täglich, um die Serie nicht zu verlieren"}
-              </p>
-            </div>
+            {(() => {
+              const streakValue = profile?.streak || 0;
+              return (
+                <div className="rounded-2xl border border-zinc-100 bg-white p-4 mb-5 shadow-sm">
+                  <p className="text-xs text-zinc-400 uppercase tracking-wide mb-1 font-bold">
+                    {lang === "ru" ? "Серия дней" : "Tage-Serie"}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-zinc-900">{streakValue}</span>
+                    <span className="text-zinc-500 text-sm font-medium">
+                      {streakValue === 1 
+                        ? (lang === "ru" ? "день подряд" : "Tag in Folge") 
+                        : streakValue > 1 && streakValue < 5 
+                        ? (lang === "ru" ? "дня подряд" : "Tage in Folge") 
+                        : (lang === "ru" ? "дней подряд" : "Tage in Folge")}
+                    </span>
+                    <span className="text-xl">🔥</span>
+                  </div>
+                  <p className="text-xs text-zinc-400 mt-1 font-medium">
+                    {lang === "ru" 
+                      ? "Отмечай приёмы пищи каждый день чтобы не терять серию" 
+                      : "Markiere deine Mahlzeiten täglich, um die Serie nicht zu verlieren"}
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* AI Dietitian Analysis Summary Card */}
             {profile?.aiAnalysisText && (
