@@ -1587,6 +1587,25 @@ app.get('/api/meals', requireAuth, async (req, res) => {
   try {
     const dbSchedule = planData?.schedule || {};
     let selectedMeals = await generateDailyMenu(profile);
+
+    // Серверная проверка: если нет snack и дефицит > 100 ккал — добавляем из статичной базы
+    const totalPlanned = (selectedMeals.breakfast?.calories || 0) +
+      (selectedMeals.lunch?.calories || 0) +
+      (selectedMeals.night?.calories || 0) +
+      (selectedMeals.snack?.calories || 0);
+    const deficit = profile.targetCalories - totalPlanned;
+
+    if (!selectedMeals.snack && deficit > 100) {
+      console.log(`[Meals] Calorie deficit ${deficit} kcal — adding fallback snack`);
+      const pool = profile.goal === 'gain' ? mealsData.high : mealsData.light;
+      if (pool.snack && pool.snack.length > 0) {
+        // Выбираем snack максимально близкий к дефициту
+        const bestSnack = pool.snack.reduce((best, s) => {
+          return Math.abs((s.calories || 0) - deficit) < Math.abs((best.calories || 0) - deficit) ? s : best;
+        }, pool.snack[0]);
+        selectedMeals.snack = bestSnack;
+      }
+    }
     
     // Dynamic filter for first launch/generation: omit already passed meals
     selectedMeals = filterPastMeals(selectedMeals, dbSchedule);
