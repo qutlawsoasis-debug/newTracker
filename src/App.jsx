@@ -368,6 +368,7 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [todayScannedCalories, setTodayScannedCalories] = useState(0);
+  const [todayScannedMacros, setTodayScannedMacros] = useState({ protein: 0, fats: 0, carbs: 0 });
   const [points, setPoints] = useState(0);
   const [upgradeModal, setUpgradeModal] = useState({ isOpen: false, message: "" });
 
@@ -380,6 +381,11 @@ function App() {
   const handleFoodLogged = useCallback((foodData) => {
     if (foodData && foodData.calories) {
       setTodayScannedCalories(prev => prev + foodData.calories);
+      setTodayScannedMacros(prev => ({
+        protein: prev.protein + (foodData.protein || 0),
+        fats: prev.fats + (foodData.fats || foodData.fat || 0),
+        carbs: prev.carbs + (foodData.carbs || 0)
+      }));
       setGlobalAnalytics(prev => ({
         ...prev,
         eatenCalories: prev.eatenCalories + foodData.calories,
@@ -674,6 +680,13 @@ function App() {
       if (data.todayScannedCalories !== undefined) {
         setTodayScannedCalories(data.todayScannedCalories);
       }
+      if (data.todayScannedMacros) {
+        setTodayScannedMacros({
+          protein: data.todayScannedMacros.protein || 0,
+          fats: data.todayScannedMacros.fat || data.todayScannedMacros.fats || 0,
+          carbs: data.todayScannedMacros.carbs || 0
+        });
+      }
       if (data.points !== undefined) {
         setPoints(data.points);
       }
@@ -869,8 +882,13 @@ function App() {
   }, [profile?.weight, targetCalories]);
 
   const eatenMacros = React.useMemo(() => {
-    return calculateEatenMacros(meals, eatenMeals, targetCalories, targetMacros);
-  }, [meals, eatenMeals, targetCalories, targetMacros]);
+    const base = calculateEatenMacros(meals, eatenMeals, targetCalories, targetMacros);
+    return {
+      protein: base.protein + todayScannedMacros.protein,
+      fats: base.fats + todayScannedMacros.fats,
+      carbs: base.carbs + todayScannedMacros.carbs
+    };
+  }, [meals, eatenMeals, targetCalories, targetMacros, todayScannedMacros]);
 
   // Single meal local reroll fallback (random select from correct goal pool)
   const handleReroll = useCallback(async (section) => {
