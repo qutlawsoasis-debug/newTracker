@@ -1175,30 +1175,25 @@ app.post('/api/system/log', async (req, res) => {
 app.get('/api/npc/chat-limit', requireAuth, async (req, res) => {
   const userId = req.user.id;
   const today = new Date().toISOString().split('T')[0];
-
   if (!supabase) return res.json({ count: 0, limitReached: false, isPremium: false });
-  
   const { data: profile } = await supabase
     .from('profiles')
     .select('subscription_status')
     .eq('telegram_id', userId)
     .maybeSingle();
-  
   if (profile?.subscription_status === 'premium') {
     return res.json({ count: 0, limitReached: false, isPremium: true });
   }
-  
-  const { count } = await supabase
-    .from('app_logs')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('endpoint', '/api/npc/chat')
-    .eq('method', 'POST')
-    .gte('timestamp', today + 'T00:00:00.000Z');
-  
-  res.json({ 
-    count: count || 0, 
-    limitReached: (count || 0) >= 3,
+  const { data: usage } = await supabase
+    .from('chat_usage')
+    .select('message_count')
+    .eq('telegram_id', userId)
+    .eq('usage_date', today)
+    .maybeSingle();
+  const count = usage?.message_count || 0;
+  return res.json({
+    count,
+    limitReached: count >= 3,
     isPremium: false
   });
 });
@@ -1221,18 +1216,15 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
       .select('subscription_status')
       .eq('telegram_id', userId)
       .maybeSingle();
-
     if (profile?.subscription_status !== 'premium') {
       const today = new Date().toISOString().split('T')[0];
-      const { count } = await supabase
-        .from('app_logs')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('endpoint', '/api/npc/chat')
-        .eq('method', 'POST')
-        .gte('timestamp', today + 'T00:00:00.000Z');
-      
-      if ((count || 0) >= 3) {
+      const { data: usage } = await supabase
+        .from('chat_usage')
+        .select('message_count')
+        .eq('telegram_id', userId)
+        .eq('usage_date', today)
+        .maybeSingle();
+      if ((usage?.message_count || 0) >= 3) {
         return res.status(403).json({
           error: "FREE_LIMIT",
           message: "Лимит 3 сообщения в день."
@@ -1298,6 +1290,28 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
       } catch (insertErr) {
   logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', insertErr?.message || String(insertErr), insertErr?.stack || '', 'Auto-captured backend error');
         console.error("[Chat] Supabase insert failed:", insertErr.message);
+      }
+    }
+
+    if (supabase) {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const { data: usage } = await supabase
+          .from('chat_usage')
+          .select('message_count')
+          .eq('telegram_id', userId.toString())
+          .eq('usage_date', today)
+          .maybeSingle();
+
+        const currentCount = usage?.message_count || 0;
+        await supabase.from('chat_usage').upsert({
+          telegram_id: userId.toString(),
+          usage_date: today,
+          message_count: currentCount + 1,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'telegram_id,usage_date' });
+      } catch (incErr) {
+        console.error("[Chat] Failed to update chat_usage:", incErr);
       }
     }
 
