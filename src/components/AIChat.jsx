@@ -89,7 +89,7 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
     }
     
     // Optimistic UI update
-    const newMsg = { sender: "user", text: messageText, image: imageBase64 };
+    const newMsg = { sender: "user", text: messageText || "", image: imageBase64 };
     setMessages(prev => [...prev, newMsg]);
     setInputValue("");
     setIsSending(true);
@@ -174,7 +174,7 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
     isProcessingImage.current = true;
     try {
       const base64 = await compressImageToBase64(file);
-      handleSendMessage(lang === "ru" ? "Анализирую изображение..." : "Analyzing image...", base64);
+      handleSendMessage("", base64);
     } catch (err) {
       console.error("Image compression error:", err);
     } finally {
