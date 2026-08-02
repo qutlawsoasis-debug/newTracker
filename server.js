@@ -232,7 +232,7 @@ Gender: ${gender === 'M' ? 'Male' : 'Female'}
 Age: ${age} years
 Height: ${height} cm
 Weight: ${weight} kg
-Activity Multiplier: ${activity} (1.2 / 1.5 / 1.8)
+Activity Multiplier: ${activity} (1.2 = sedentary, 1.375 = lightly active, 1.55 = moderately active, 1.8 = very active)
 Diet Goal: ${goal} (gain: +500 kcal, maintain: 0 kcal, lose: -500 kcal)
 
 Formula:
