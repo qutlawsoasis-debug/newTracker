@@ -3,6 +3,7 @@ import React, { useState } from "react";
 export default function OnboardingScreen({ onComplete, lang = "ru" }) {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   const [gender, setGender] = useState("M");
   const [age, setAge] = useState(22);
@@ -15,9 +16,19 @@ export default function OnboardingScreen({ onComplete, lang = "ru" }) {
   const isRu = lang === "ru";
 
   const handleNextStep2 = () => {
-    if (!age || age < 10 || age > 120) return;
-    if (!height || height < 100 || height > 250) return;
-    if (!weight || weight < 20 || weight > 300) return;
+    setValidationError("");
+    if (!age || age < 10 || age > 120) {
+      setValidationError(isRu ? "Введите корректный возраст (10–120 лет)" : "Gib ein gültiges Alter ein (10–120 Jahre)");
+      return;
+    }
+    if (!height || height < 100 || height > 250) {
+      setValidationError(isRu ? "Введите корректный рост (100–250 см)" : "Gib eine gültige Größe ein (100–250 cm)");
+      return;
+    }
+    if (!weight || weight < 20 || weight > 300) {
+      setValidationError(isRu ? "Введите корректный вес (20–300 кг)" : "Gib ein gültiges Gewicht ein (20–300 kg)");
+      return;
+    }
     setStep(3);
   };
 
@@ -299,7 +310,11 @@ export default function OnboardingScreen({ onComplete, lang = "ru" }) {
 
       {/* Bottom Action Buttons */}
       {!isSubmitting && (
-        <div className="pt-6 border-t border-zinc-100 mt-6 flex space-x-3">
+        <div className="pt-6 border-t border-zinc-100 mt-6 flex flex-col space-y-3">
+          {validationError && (
+            <p className="text-xs text-red-500 text-center font-medium">{validationError}</p>
+          )}
+          <div className="flex space-x-3">
           {step > 1 && (
             <button
               type="button"
@@ -328,7 +343,8 @@ export default function OnboardingScreen({ onComplete, lang = "ru" }) {
             </button>
           )}
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 }
