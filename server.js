@@ -1081,10 +1081,16 @@ app.post('/api/nutrition/scan', requireAuth, async (req, res) => {
     const prompt = "Проанализируй фото блюда и определи название, вес, калории, белки, жиры и углеводы. Верни строго в JSON.";
 
     const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "qwen/qwen3.6-27b",
       messages: [
         { role: "system", content: systemInstruction },
-        { role: "user", content: prompt }
+        {
+          role: "user",
+          content: [
+            { type: "image_url", image_url: { url: image } },
+            { type: "text", text: prompt }
+          ]
+        }
       ],
       max_tokens: 1000,
       response_format: { type: "json_object" }
@@ -1287,7 +1293,7 @@ app.post('/api/npc/chat', requireAuth, async (req, res) => {
 
     const completion = await Promise.race([
       groq.chat.completions.create({
-        model: image ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile",
+        model: image ? "qwen/qwen3.6-27b" : "llama-3.3-70b-versatile",
         messages: groqMessages,
         max_tokens: 1000,
         response_format: { type: "json_object" }
