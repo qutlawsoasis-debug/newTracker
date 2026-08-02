@@ -1336,9 +1336,14 @@ function App() {
                 Beta
               </span>
             </div>
-            <span className="text-[10px] font-medium text-zinc-400 mt-1 capitalize">
-              {dateStr}
-            </span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[10px] font-medium text-zinc-400 capitalize">{dateStr}</span>
+              {(profile?.streak || 0) > 0 && (
+                <span className="text-[10px] font-bold text-orange-500 flex items-center gap-0.5">
+                  🔥 {profile.streak} {lang === "ru" ? "дн." : "Tage"}
+                </span>
+              )}
+            </div>
           </div>
           
           {/* iOS-style Segmented language selector */}
