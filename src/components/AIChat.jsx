@@ -4,6 +4,7 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef(null);
+  const isProcessingImage = useRef(false);
   const messagesEndRef = useRef(null);
 
   const [chatCount, setChatCount] = useState(0);
@@ -161,19 +162,25 @@ const AIChat = ({ isOpen, onClose, userId, lang, messages, setMessages, onFoodLo
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (isProcessingImage.current) return;
 
     if (isLimitReached) {
       if (onUpgradeClick) {
-        onUpgradeClick(lang === "ru" ? "⭐ Лимит 3 сообщения в день. Upgrade до Premium для безлимитного AI чата" : "⭐ Limit 3 Nachrichten/Tag. Upgrade auf Premium для unbegrenzten KI-Chat");
+        onUpgradeClick(lang === "ru" ? "⭐ Лимит 3 сообщения в день. Upgrade до Premium для безлимитного AI чата" : "⭐ Limit 3 Nachrichten/Tag. Upgrade на Premium для безлимитного AI чата");
       }
       return;
     }
 
+    isProcessingImage.current = true;
     try {
       const base64 = await compressImageToBase64(file);
       handleSendMessage(lang === "ru" ? "Анализирую изображение..." : "Analyzing image...", base64);
     } catch (err) {
       console.error("Image compression error:", err);
+    } finally {
+      // Сбрасываем input и флаг после обработки
+      e.target.value = '';
+      setTimeout(() => { isProcessingImage.current = false; }, 1000);
     }
   };
 
