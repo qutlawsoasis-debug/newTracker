@@ -400,48 +400,18 @@ Instructions:
 }
 
 async function generateChangelog() {
-  return ['Эппи v1.3.7 — стабильная версия.'];
+  return ['Эппи v1.0.0-beta — первый публичный запуск. Спасибо что с нами!'];
 }
 
 // API to fetch dynamic AI release notes
 app.get('/api/changelog', async (req, res) => {
   const version = req.query.version || DATA_VERSION;
-  try {
-    let description = "";
-    if (supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('app_versions')
-          .select('description')
-          .eq('version', version)
-          .maybeSingle();
-        if (!error && data) {
-          description = data.description;
-        }
-      } catch (e) {
-        // Игнорируем отсутствие таблицы
-      }
-    }
-
-    if (!description && changelogData.history && changelogData.history[version]) {
-      description = changelogData.history[version].raw_changes;
-    }
-
-    const points = await generateChangelog(version, description);
-    return res.json({ version, points });
-  } catch (err) {
-  logSystemError(typeof req !== 'undefined' ? (req?.user?.id || req?.body?.userId) : 'system', 'backend', 'error', err?.message || String(err), err?.stack || '', 'Auto-captured backend error');
-    console.error("Changelog generation failed:", err);
-    return res.json({ 
-      version, 
-      points: [
-        "Интеграция облачной базы данных Supabase для сохранения данных.",
-        "Исправление кодировки и локализации для настроек профиля.",
-        "Интеграция единого списка покупок на день.",
-        "ИИ-замена домашних блюд на готовые альтернативы из REWE/ALDI."
-      ] 
-    });
-  }
+  return res.json({
+    version,
+    points: [
+      "Эппи v1.0.0-beta — первый публичный запуск. Спасибо что с нами!"
+    ]
+  });
 });
 
 // API to get weight history

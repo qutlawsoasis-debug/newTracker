@@ -1414,9 +1414,14 @@ function App() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100">
         <div className="max-w-lg mx-auto px-4 h-12 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-[14px] font-bold text-[#1D1D1F] tracking-tight leading-none">
-              Эппи
-            </span>
+            <div className="flex items-center">
+              <span className="text-[14px] font-bold text-[#1D1D1F] tracking-tight leading-none">
+                Эппи
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 bg-orange-100 text-orange-500 rounded-md ml-1.5">
+                Beta
+              </span>
+            </div>
             <span className="text-[10px] font-medium text-zinc-400 mt-1 capitalize">
               {dateStr}
             </span>
