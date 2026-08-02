@@ -201,7 +201,7 @@ function filterPastMeals(meals, schedule) {
 // Helper for local default menu selection in case Gemini fails
 function getDailyRandomIndex(pool, section) {
   const today = new Date();
-  const dateStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
   let hash = 0;
   const seed = dateStr + section;
   for (let i = 0; i < seed.length; i++) {
