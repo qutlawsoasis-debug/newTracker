@@ -1103,7 +1103,8 @@ app.post('/api/nutrition/scan', requireAuth, async (req, res) => {
       max_tokens: 1000
     });
 
-    const responseText = completion.choices[0].message.content.trim();
+    let responseText = completion.choices[0].message.content.trim();
+    responseText = responseText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
     console.log(`[Scan] Groq response:`, responseText);
 
     const scanResult = safeJsonParse(responseText);
