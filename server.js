@@ -400,7 +400,7 @@ Instructions:
 }
 
 async function generateChangelog() {
-  return ['GainTracker v1.3.7 — стабильная версия.'];
+  return ['Эппи v1.3.7 — стабильная версия.'];
 }
 
 // API to fetch dynamic AI release notes

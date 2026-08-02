@@ -2144,13 +2144,13 @@ function App() {
 
             {/* Release notes changelog card */}
             {changelog && changelog.points && (
-              <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl p-4 text-left shadow-sm">
+              <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl p-4 pb-4 text-left shadow-sm mb-4">
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
                   Что нового в v{changelog.version}
                 </h4>
                 <ul className="list-disc list-inside space-y-1 text-[11px] text-zinc-500 font-medium">
                   {changelog.points.map((pt, idx) => (
-                    <li key={idx} className="leading-relaxed">{pt}</li>
+                    <li key={idx} className="leading-relaxed">{typeof pt === 'string' ? pt.replaceAll("GainTracker", "Эппи") : pt}</li>
                   ))}
                 </ul>
               </div>
