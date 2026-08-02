@@ -171,7 +171,7 @@ function filterPastMeals(meals, schedule) {
   const bedTime = schedule?.bedTime || "23:00";
   const tzOffset = (typeof schedule?.tzOffset === 'number') ? schedule.tzOffset : -180; // default UTC+3
   
-  const localDate = new Date(Date.now() - tzOffset * 60000);
+  const localDate = new Date(Date.now() + tzOffset * 60000);
   const currentTotalMinutes = localDate.getUTCHours() * 60 + localDate.getUTCMinutes();
   
   const parseTime = (timeStr) => {
@@ -2520,7 +2520,7 @@ const checkAndSendNotifications = async () => {
     const { wakeTime, bedTime, remind1h } = schedule;
     if (typeof tzOffset !== 'number') continue;
 
-    const clientDate = new Date(utcTimestamp - (tzOffset * 60000));
+    const clientDate = new Date(utcTimestamp + (tzOffset * 60000));
     const clientHour = clientDate.getUTCHours();
     const clientMin = clientDate.getUTCMinutes();
     const clientDayStr = `${clientDate.getUTCFullYear()}-${clientDate.getUTCMonth() + 1}-${clientDate.getUTCDate()}`;
