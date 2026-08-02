@@ -681,12 +681,6 @@ app.get('/api/referral/stats', requireAuth, async (req, res) => {
   });
 });
 
-app.get('/api/referral/raw-tables', async (req, res) => {
-  if (!supabase) return res.json({ error: "No Supabase connection" });
-  const { data: refData } = await supabase.from('referrals').select('*');
-  const { data: ptsData } = await supabase.from('user_points').select('*');
-  return res.json({ referrals: refData || [], user_points: ptsData || [] });
-});
 
 
 const ensureUserGeolocation = async (userId, profileData, req) => {
