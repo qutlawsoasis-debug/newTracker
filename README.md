@@ -6,6 +6,8 @@
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Groq AI](https://img.shields.io/badge/AI-Groq%20Llama%203.3%20%2B%20Qwen%20Vision-F34F29)](https://groq.com/)
 [![Supabase](https://img.shields.io/badge/Database-Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Release](https://img.shields.io/badge/Release-v1.0.0--beta-blue.svg)](https://github.com/qutlawsoasis-debug/newTracker/releases)
+[![Code of Conduct](https://img.shields.io/badge/Code%20of%20Conduct-Contributor%20Covenant-green.svg)](CODE_OF_CONDUCT.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **Appy** is an intelligent, high-performance Telegram Mini App designed for automated calorie tracking, AI-powered meal planning, and nutrition coaching. It combines personalized BMR calculations, vision-based food recognition, and localized supermarket product recommendations (Germany & CIS regions) into a seamless mobile web application.
