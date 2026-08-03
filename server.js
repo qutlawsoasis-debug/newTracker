@@ -78,17 +78,13 @@ if (supabase) {
 }
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const allowedUserIdsStr = process.env.ALLOWED_USER_IDS || '';
-const allowedUserIds = allowedUserIdsStr.split(',').map(id => id.trim()).filter(Boolean);
-
-if (!token) {
-  console.error('Error: TELEGRAM_BOT_TOKEN environment variable is required');
-  process.exit(1);
+let bot = null;
+if (token) {
+  bot = new Bot(token);
+  bot.init().catch(err => console.error('Failed to init bot:', err));
+} else {
+  console.warn('TELEGRAM_BOT_TOKEN environment variable is missing. Bot features disabled.');
 }
-
-// Initialize Telegram Bot
-const bot = new Bot(token);
-bot.init().catch(err => console.error('Failed to init bot:', err));
 
 // Initialize Groq AI (llama-3.3-70b-versatile)
 const groqApiKey = process.env.GROQ_API_KEY;

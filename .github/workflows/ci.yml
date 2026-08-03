@@ -33,6 +33,9 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E Tests (Playwright)
+        env:
+          TELEGRAM_BOT_TOKEN: "123456789:mock_ci_token_for_playwright_e2e"
+          GROQ_API_KEY: "mock_ci_groq_api_key"
         run: npm run test:e2e
 
       - name: Build Client Bundle (Vite)
