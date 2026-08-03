@@ -15,6 +15,10 @@ export default defineConfig({
   webServer: {
     command: 'node server.js',
     url: 'http://127.0.0.1:3000',
+    env: {
+      TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '123456789:mock_ci_token_for_playwright',
+      GROQ_API_KEY: process.env.GROQ_API_KEY || 'mock_groq_api_key_for_ci',
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
