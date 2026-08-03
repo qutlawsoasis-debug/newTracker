@@ -28,3 +28,7 @@ Thumbs.db
 
 # Archives & Temporary state
 deploy.tar.gz
+.agents/
+playwright-report/
+test-results/
+screenshots/
